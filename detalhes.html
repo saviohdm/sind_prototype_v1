@@ -234,13 +234,12 @@
             <thead>
               <tr>
                 <th>Descrição</th>
-                <th>Capitulação jurídica</th>
                 <th>Data do fato</th>
                 <th>Data da prescrição</th>
                 <th>Envolvidos vinculados</th>
               </tr>
             </thead>
-            <tbody id="tbody-fatos"><tr><td colspan="5">—</td></tr></tbody>
+            <tbody id="tbody-fatos"><tr><td colspan="4">—</td></tr></tbody>
           </table>
         </div>
       </section>
@@ -404,7 +403,6 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${escapeHtml(f.descricao||'')}</td>
-          <td>${escapeHtml(f.capitulacao||'')}</td>
           <td>${formatDate(f.dataFato)||'—'}</td>
           <td>${formatDate(f.dataPrescricao)||'—'}</td>
           <td>${nomes || '—'}</td>
@@ -412,7 +410,7 @@
         tbody.appendChild(tr);
       });
       if(!state.procedimento.fatos.length){
-        tbody.innerHTML = '<tr><td colspan="5">Nenhum fato cadastrado.</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="4">Nenhum fato cadastrado.</td></tr>';
       }
     }
 
