@@ -319,6 +319,20 @@
             <label class="label" for="and-data-fim">Data Fim</label>
             <input id="and-data-fim" type="date" />
           </div>
+          <!-- Campo condicional: Admissibilidade recursal (apenas quando "Admissibilidade recursal" for selecionado) -->
+          <div class="field" id="field-adm-recursal" style="grid-column:1 / -1; display:none">
+            <span class="label">Admissibilidade recursal</span>
+            <div class="row-actions" role="radiogroup" aria-label="Admissibilidade recursal" style="flex-wrap:wrap">
+              <label class="chip" style="cursor:pointer">
+                <input type="radio" name="and-adm" value="Recebimento" style="margin-right:6px" />
+                Recebimento
+              </label>
+              <label class="chip" style="cursor:pointer">
+                <input type="radio" name="and-adm" value="Rejeição" style="margin-right:6px" />
+                Rejeição
+              </label>
+            </div>
+          </div>
           <div class="field">
             <label class="label" for="and-arquivo">Anexo (PDF obrigatório)</label>
             <input id="and-arquivo" type="file" accept="application/pdf" />
@@ -495,6 +509,8 @@
   const s = $('#and-nova-classe'); if(s) s.value = '';
   const f2 = $('#field-data-fim'); if(f2) f2.style.display = 'none';
   const d2 = $('#and-data-fim'); if(d2) d2.value = '';
+  const f3 = $('#field-adm-recursal'); if(f3) f3.style.display = 'none';
+  $$('input[name="and-adm"]').forEach(el=> el.checked = false);
     }
     function validarAndamento(){
       const desc = $('#and-desc').value.trim();
@@ -530,6 +546,12 @@
       const dataFimVal = $('#and-data-fim')?.value?.trim();
       if(fieldFimVisible && dataFimVal){
         novo.dataFim = dataFimVal;
+      }
+      // inclui admissibilidade recursal se campo estiver visível e houver valor
+      const fieldAdmVisible = $('#field-adm-recursal') && getComputedStyle($('#field-adm-recursal')).display !== 'none';
+      const admVal = document.querySelector('input[name="and-adm"]:checked')?.value;
+      if(fieldAdmVisible && admVal){
+        novo.admissibilidade = admVal;
       }
       state.andamentos.push(novo);
       renderAndamentos();
@@ -584,6 +606,13 @@
         if(fieldFim){
           fieldFim.style.display = showDataFim ? '' : 'none';
           if(!showDataFim){ const d = $('#and-data-fim'); if(d) d.value=''; }
+        }
+        // Admissibilidade recursal
+        const showAdm = val === 'Admissibilidade recursal';
+        const fieldAdm = $('#field-adm-recursal');
+        if(fieldAdm){
+          fieldAdm.style.display = showAdm ? '' : 'none';
+          if(!showAdm){ $$('input[name="and-adm"]').forEach(el=> el.checked=false); }
         }
       }
       $('#and-desc').addEventListener('change', toggleConditionalFields);
