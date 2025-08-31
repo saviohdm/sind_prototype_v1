@@ -296,9 +296,28 @@
               <option>Reativação do procedimento</option>
             </select>
           </div>
+          <!-- Campo condicional: Nova classe (apenas quando "Instauração / Conversão" for selecionado) -->
+          <div class="field" id="field-nova-classe" style="grid-column:1 / -1; display:none">
+            <label class="label" for="and-nova-classe">Nova classe</label>
+            <select id="and-nova-classe">
+              <option value="">Selecione...</option>
+              <option>Notícia de Fato</option>
+              <option>Reclamação</option>
+              <option>Sindicância</option>
+              <option>Procedimento Preparatório</option>
+              <option>Procedimento Investigatório</option>
+              <option>Procedimento Administrativo Disciplinar</option>
+            </select>
+            <div class="hint">Selecione a nova classe do procedimento (quando aplicável).</div>
+          </div>
           <div class="field">
             <label class="label" for="and-data">Data do movimento</label>
             <input id="and-data" type="date" />
+          </div>
+          <!-- Campo condicional: Data Fim (apenas quando "Sobrestamento" for selecionado) -->
+          <div class="field" id="field-data-fim" style="display:none">
+            <label class="label" for="and-data-fim">Data Fim</label>
+            <input id="and-data-fim" type="date" />
           </div>
           <div class="field">
             <label class="label" for="and-arquivo">Anexo (PDF obrigatório)</label>
@@ -471,6 +490,11 @@
       $('#and-desc').value = '';
       $('#and-data').value = '';
       $('#and-arquivo').value = '';
+  // limpa e oculta campo condicional
+  const f = $('#field-nova-classe'); if(f) f.style.display = 'none';
+  const s = $('#and-nova-classe'); if(s) s.value = '';
+  const f2 = $('#field-data-fim'); if(f2) f2.style.display = 'none';
+  const d2 = $('#and-data-fim'); if(d2) d2.value = '';
     }
     function validarAndamento(){
       const desc = $('#and-desc').value.trim();
@@ -495,6 +519,18 @@
         data: $('#and-data').value,
         arquivo: file ? { nome: file.name, url } : null
       };
+      // inclui novaClasse se campo estiver visível e houver valor
+      const fieldVisible = $('#field-nova-classe') && getComputedStyle($('#field-nova-classe')).display !== 'none';
+      const novaClasseVal = $('#and-nova-classe')?.value?.trim();
+      if(fieldVisible && novaClasseVal){
+        novo.novaClasse = novaClasseVal;
+      }
+      // inclui dataFim se campo estiver visível e houver valor
+      const fieldFimVisible = $('#field-data-fim') && getComputedStyle($('#field-data-fim')).display !== 'none';
+      const dataFimVal = $('#and-data-fim')?.value?.trim();
+      if(fieldFimVisible && dataFimVal){
+        novo.dataFim = dataFimVal;
+      }
       state.andamentos.push(novo);
       renderAndamentos();
       closeModal('dlg-andamento');
@@ -531,6 +567,28 @@
       $('#btn-salvar-andamento').addEventListener('click', ()=>{
         if(validarAndamento()) salvarAndamento();
       });
+
+      // Toggle campos condicionais conforme a descrição selecionada
+      function toggleConditionalFields(){
+        const val = ($('#and-desc').value || '').trim();
+        // Nova classe (Instauração / Conversão)
+        const showNovaClasse = val === 'Instauração / Conversão';
+        const fieldNova = $('#field-nova-classe');
+        if(fieldNova){
+          fieldNova.style.display = showNovaClasse ? '' : 'none';
+          if(!showNovaClasse){ const s = $('#and-nova-classe'); if(s) s.value=''; }
+        }
+        // Data Fim (Sobrestamento)
+        const showDataFim = val === 'Sobrestamento';
+        const fieldFim = $('#field-data-fim');
+        if(fieldFim){
+          fieldFim.style.display = showDataFim ? '' : 'none';
+          if(!showDataFim){ const d = $('#and-data-fim'); if(d) d.value=''; }
+        }
+      }
+      $('#and-desc').addEventListener('change', toggleConditionalFields);
+      // garante estado inicial correto ao abrir a página
+      toggleConditionalFields();
 
       // Limpeza na saída: revoga blob URLs
       window.addEventListener('beforeunload', ()=>{
