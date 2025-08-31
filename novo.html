@@ -351,7 +351,6 @@
               <thead>
                 <tr>
                   <th>Descrição</th>
-                  <th>Capitulação</th>
                   <th>Data do fato</th>
                   <th>Prescrição</th>
                   <th>Envolvidos (vinculados ao fato)</th>
@@ -443,16 +442,7 @@
             <div class="hint"><span id="fato-desc-count">0</span>/60</div>
           </div>
 
-          <div class="field">
-            <label class="label" for="fato-cap">Capitulação jurídica</label>
-            <select id="fato-cap">
-              <option value="">Selecione</option>
-              <option>Infração funcional – Art. 11</option>
-              <option>Infração funcional – Art. 9º</option>
-              <option>Descumprimento de dever funcional</option>
-              <option>Conflito de interesses</option>
-            </select>
-          </div>
+          
 
           <div class="field">
             <label class="label" for="fato-data">Data do fato</label>
@@ -548,7 +538,7 @@
       if(state.fatos.length === 0){
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 6;
+        td.colSpan = 5;
         td.style.color = 'var(--muted-2)';
         td.textContent = 'Nenhum fato cadastrado.';
         tr.appendChild(td);
@@ -563,7 +553,6 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${f.descricao}</td>
-          <td>${f.capitulacao || '-'}</td>
           <td>${f.dataFato || '-'}</td>
           <td>${f.dataPresc || '-'}</td>
           <td>${nomes.length ? nomes.map(n=>'<span class="pill">'+n+'</span>').join(' ') : '-'}</td>
@@ -592,7 +581,6 @@
           $('#dlg-fato-title').textContent = 'Editar Fato';
           $('#fato-desc').value = f.descricao || '';
           $('#fato-desc-count').textContent = String(f.descricao?.length||0);
-          $('#fato-cap').value = f.capitulacao || '';
           $('#fato-data').value = f.dataFato || '';
           $('#fato-presc').value = f.dataPresc || '';
           // checklist de envolvidos
@@ -733,8 +721,8 @@
       $('#btn-add-fato').addEventListener('click', ()=>{
         state.editFatoIndex = null;
         $('#dlg-fato-title').textContent = 'Cadastrar Fato';
-        $('#fato-desc').value=''; $('#fato-desc-count').textContent='0';
-        $('#fato-cap').value=''; $('#fato-data').value=''; $('#fato-presc').value='';
+  $('#fato-desc').value=''; $('#fato-desc-count').textContent='0';
+  $('#fato-data').value=''; $('#fato-presc').value='';
         montarChecklistEnvolvidos([]);
         openModal('modal-fato');
       });
@@ -751,12 +739,11 @@
           alert('Informe a descrição do fato (obrigatória).');
           return;
         }
-        const capitulacao = $('#fato-cap').value;
         const dataFato = $('#fato-data').value;
         const dataPresc = $('#fato-presc').value;
         const envolvidos = $$('#checklist-envolvidos input[type="checkbox"]:checked').map(i=>i.value);
 
-        const payload = { descricao, capitulacao, dataFato, dataPresc, envolvidos };
+  const payload = { descricao, dataFato, dataPresc, envolvidos };
 
         if(state.editFatoIndex===null){
           state.fatos.push(payload);
