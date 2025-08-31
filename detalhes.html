@@ -333,6 +333,28 @@
               </label>
             </div>
           </div>
+          <!-- Campo condicional: Julgamento recursal (apenas quando "Julgamento recursal" for selecionado) -->
+          <div class="field" id="field-julg-recursal" style="grid-column:1 / -1; display:none">
+            <span class="label">Julgamento recursal</span>
+            <div class="row-actions" role="radiogroup" aria-label="Julgamento recursal" style="flex-wrap:wrap">
+              <label class="chip" style="cursor:pointer">
+                <input type="radio" name="and-julg" value="Procedência" style="margin-right:6px" />
+                Procedência
+              </label>
+              <label class="chip" style="cursor:pointer">
+                <input type="radio" name="and-julg" value="Parcial procedência" style="margin-right:6px" />
+                Parcial procedência
+              </label>
+              <label class="chip" style="cursor:pointer">
+                <input type="radio" name="and-julg" value="Improcedência" style="margin-right:6px" />
+                Improcedência
+              </label>
+              <label class="chip" style="cursor:pointer">
+                <input type="radio" name="and-julg" value="Extinção sem análise de mérito" style="margin-right:6px" />
+                Extinção sem análise de mérito
+              </label>
+            </div>
+          </div>
           <div class="field">
             <label class="label" for="and-arquivo">Anexo (PDF obrigatório)</label>
             <input id="and-arquivo" type="file" accept="application/pdf" />
@@ -511,6 +533,8 @@
   const d2 = $('#and-data-fim'); if(d2) d2.value = '';
   const f3 = $('#field-adm-recursal'); if(f3) f3.style.display = 'none';
   $$('input[name="and-adm"]').forEach(el=> el.checked = false);
+  const f4 = $('#field-julg-recursal'); if(f4) f4.style.display = 'none';
+  $$('input[name="and-julg"]').forEach(el=> el.checked = false);
     }
     function validarAndamento(){
       const desc = $('#and-desc').value.trim();
@@ -552,6 +576,12 @@
       const admVal = document.querySelector('input[name="and-adm"]:checked')?.value;
       if(fieldAdmVisible && admVal){
         novo.admissibilidade = admVal;
+      }
+      // inclui julgamento recursal se campo estiver visível e houver valor
+      const fieldJulgVisible = $('#field-julg-recursal') && getComputedStyle($('#field-julg-recursal')).display !== 'none';
+      const julgVal = document.querySelector('input[name="and-julg"]:checked')?.value;
+      if(fieldJulgVisible && julgVal){
+        novo.julgamentoRecursal = julgVal;
       }
       state.andamentos.push(novo);
       renderAndamentos();
@@ -613,6 +643,13 @@
         if(fieldAdm){
           fieldAdm.style.display = showAdm ? '' : 'none';
           if(!showAdm){ $$('input[name="and-adm"]').forEach(el=> el.checked=false); }
+        }
+        // Julgamento recursal
+        const showJulg = val === 'Julgamento recursal';
+        const fieldJulg = $('#field-julg-recursal');
+        if(fieldJulg){
+          fieldJulg.style.display = showJulg ? '' : 'none';
+          if(!showJulg){ $$('input[name="and-julg"]').forEach(el=> el.checked=false); }
         }
       }
       $('#and-desc').addEventListener('change', toggleConditionalFields);
