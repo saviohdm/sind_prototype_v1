@@ -355,6 +355,12 @@
               </label>
             </div>
           </div>
+          <!-- Campo condicional: Número ELO do CNMP (apenas quando "Avocação pelo CNMP" for selecionado) -->
+          <div class="field" id="field-elo" style="grid-column:1 / -1; display:none">
+            <label class="label" for="and-elo">Número ELO (CNMP)</label>
+            <input id="and-elo" type="text" inputmode="numeric" placeholder="NNNNNNN-DD.AAAA.J.TT.OOOO" maxlength="25" />
+            <div class="hint">Formato: NNNNNNN-DD.AAAA.J.TT.OOOO</div>
+          </div>
           <div class="field">
             <label class="label" for="and-arquivo">Anexo (PDF obrigatório)</label>
             <input id="and-arquivo" type="file" accept="application/pdf" />
@@ -535,6 +541,8 @@
   $$('input[name="and-adm"]').forEach(el=> el.checked = false);
   const f4 = $('#field-julg-recursal'); if(f4) f4.style.display = 'none';
   $$('input[name="and-julg"]').forEach(el=> el.checked = false);
+  const f5 = $('#field-elo'); if(f5) f5.style.display = 'none';
+  const elo = $('#and-elo'); if(elo) elo.value = '';
     }
     function validarAndamento(){
       const desc = $('#and-desc').value.trim();
@@ -582,6 +590,12 @@
       const julgVal = document.querySelector('input[name="and-julg"]:checked')?.value;
       if(fieldJulgVisible && julgVal){
         novo.julgamentoRecursal = julgVal;
+      }
+      // inclui número ELO se campo estiver visível e houver valor
+      const fieldEloVisible = $('#field-elo') && getComputedStyle($('#field-elo')).display !== 'none';
+      const eloVal = $('#and-elo')?.value?.trim();
+      if(fieldEloVisible && eloVal){
+        novo.elo = eloVal;
       }
       state.andamentos.push(novo);
       renderAndamentos();
@@ -651,10 +665,37 @@
           fieldJulg.style.display = showJulg ? '' : 'none';
           if(!showJulg){ $$('input[name="and-julg"]').forEach(el=> el.checked=false); }
         }
+        // Avocação pelo CNMP -> Número ELO
+        const showElo = val === 'Avocação pelo CNMP';
+        const fieldElo = $('#field-elo');
+        if(fieldElo){
+          fieldElo.style.display = showElo ? '' : 'none';
+          if(!showElo){ const e = $('#and-elo'); if(e) e.value=''; }
+        }
       }
       $('#and-desc').addEventListener('change', toggleConditionalFields);
       // garante estado inicial correto ao abrir a página
       toggleConditionalFields();
+
+      // Máscara do ELO: NNNNNNN-DD.AAAA.J.TT.OOOO
+      function maskElo(v){
+        const d = String(v||'').replace(/\D/g,'').slice(0,20);
+        const s1 = d.slice(0,7);
+        const s2 = d.slice(7,9);
+        const s3 = d.slice(9,13);
+        const s4 = d.slice(13,14);
+        const s5 = d.slice(14,16);
+        const s6 = d.slice(16,20);
+        let out = s1;
+        if(s2) out += '-' + s2;
+        if(s3) out += '.' + s3;
+        if(s4) out += '.' + s4;
+        if(s5) out += '.' + s5;
+        if(s6) out += '.' + s6;
+        return out;
+      }
+      const eloInput = $('#and-elo');
+      if(eloInput){ eloInput.addEventListener('input', (e)=>{ e.target.value = maskElo(e.target.value); }); }
 
       // Limpeza na saída: revoga blob URLs
       window.addEventListener('beforeunload', ()=>{
