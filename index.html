@@ -260,7 +260,7 @@
 
       <!-- Acervo -->
       <section>
-        <h2 class="section-title">Acervo do MPRO (ou últimas edições???)</h2>
+        <h2 class="section-title">Acervo do MPRO - recentes</h2>
         <div class="card">
           <div class="card__content">
             <div class="table-wrap">
@@ -333,9 +333,11 @@
                 </tbody>
               </table>
             </div>
-            <div class="right">
-              <a href="acervo.html" class="btn btn--outline">Ver mais</a>
-            </div>
+              <!---
+              <div class="right">
+                <a href="acervo.html" class="btn btn--outline">Ver mais</a>
+              </div>
+              -->
           </div>
         </div>
       </section>
@@ -343,7 +345,8 @@
       <!-- Mensagens + Estatísticas -->
       <section class="grid-2">
 
-        <!-- Mensagens -->
+
+        <!-- Procedimentos com maior duração -->
         <div class="card">
           <div class="card__content">
             <h2 class="section-title">
@@ -352,7 +355,43 @@
                 <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
               </svg>
-              Mensagens (trocar por 5 com maior duração)
+              Procedimentos com maior duração
+            </h2>
+
+            <div class="table-wrap" style="margin-top:12px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Duração (dias)</th>
+                  </tr>
+                </thead>
+                <tbody id="t-maior-duracao"></tbody>
+              </table>
+            </div>
+
+            <div class="right">
+              <a href="#" class="btn btn--outline">Ver mais</a>
+            </div>
+          </div>
+        </div>
+
+        
+        <!-- Mensagens -->
+        
+        <!--
+        <div class="card">
+          <div class="card__content">
+            <h2 class="section-title">
+            -->
+
+              <!-- sino -->
+              <!--
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              Procedimentos em andamento com maior duração
             </h2>
 
             <div class="divider"></div>
@@ -381,6 +420,11 @@
             </div>
           </div>
         </div>
+      -->
+        
+
+
+
 
         <!-- Estatísticas -->
         <div class="card">
@@ -391,7 +435,7 @@
                 <path d="M3 3v18h18"/>
                 <path d="M19 9l-5 5-4-4-6 6"/>
               </svg>
-              Estatísticas (incluir informaçao de classes)
+              Estatísticas
             </h2>
 
             <div class="stats">
@@ -436,6 +480,68 @@
       </section>
     </main>
   </div>
+
+  
+
+
+  <script>
+  (function () {
+    // 1) Localiza o tbody da tabela do "Acervo do MPRO - recentes"
+    // Procura o <h2.section-title> que contém "Acervo do MPRO" e pega o primeiro <tbody> de tabela dentro da mesma seção
+    const acervoTitleEls = Array.from(document.querySelectorAll('h2.section-title'));
+    const acervoTitleEl = acervoTitleEls.find(el => /Acervo do MPRO/i.test(el.textContent || ''));
+    if (!acervoTitleEl) return;
+
+    const acervoSection = acervoTitleEl.closest('section');
+    if (!acervoSection) return;
+
+    const acervoTbody = acervoSection.querySelector('table tbody');
+    const duracaoTbody = document.getElementById('t-maior-duracao');
+    if (!acervoTbody || !duracaoTbody) return;
+
+    // 2) Função para parsear datas no formato DD/MM/AAAA
+    function parseBRDate(str) {
+      const [d, m, y] = (str || '').split('/').map(s => parseInt(s, 10));
+      if (!d || !m || !y) return null;
+      // Date: meses começam em 0 no JS
+      return new Date(y, m - 1, d);
+    }
+
+    // 3) Calcula dias parados (0 se a data é futura)
+    function diasParados(ultimaData) {
+      const hoje = new Date();
+      // zera horas pra cálculo só em dias
+      hoje.setHours(0,0,0,0);
+      if (!ultimaData) return 0;
+      const diffMs = hoje.getTime() - ultimaData.getTime();
+      const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      return diffDias < 0 ? 0 : diffDias;
+    }
+
+    // 4) Lê cada linha do acervo e monta { numero, duracaoEmDias }
+    const linhas = Array.from(acervoTbody.querySelectorAll('tr'));
+    const registros = linhas.map(tr => {
+      const tds = tr.querySelectorAll('td');
+      const numero = tds?.[0]?.textContent?.trim() || '';
+      const dataUltimoAndamentoStr = tds?.[4]?.textContent?.trim() || '';
+      const dataUltimoAndamento = parseBRDate(dataUltimoAndamentoStr);
+      const duracao = diasParados(dataUltimoAndamento);
+      return { numero, duracao };
+    });
+
+    // 5) Ordena por duração (desc) e pega os 5 primeiros
+    registros.sort((a, b) => b.duracao - a.duracao);
+    const top5 = registros.slice(0, 5);
+
+    // 6) Renderiza no tbody da nova tabela
+    duracaoTbody.innerHTML = top5.map(item => `
+      <tr>
+        <td>${item.numero}</td>
+        <td>${item.duracao}</td>
+      </tr>
+    `).join('');
+  })();
+</script>
 
   <script>
     // Remova ou comente esta linha:
