@@ -355,6 +355,25 @@
               </label>
             </div>
           </div>
+          <!-- Campo condicional: Decisão de mérito (apenas quando "Decisão de mérito" for selecionado) -->
+          <div class="field" id="field-merito" style="grid-column:1 / -1; display:none">
+            <span class="label">Decisão de mérito por envolvido e fato</span>
+            <div style="border:1px solid var(--border); border-radius:12px; overflow:auto; max-height:260px">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Envolvido</th>
+                    <th>Fato</th>
+                    <th style="width:220px">Resultado</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-merito">
+                  <tr><td colspan="3">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="hint">Defina o resultado de mérito para cada relação envolvido × fato.</div>
+          </div>
           <!-- Campo condicional: Número ELO do CNMP (apenas quando "Avocação pelo CNMP" for selecionado) -->
           <div class="field" id="field-elo" style="grid-column:1 / -1; display:none">
             <label class="label" for="and-elo">Número ELO (CNMP)</label>
@@ -541,6 +560,8 @@
   $$('input[name="and-adm"]').forEach(el=> el.checked = false);
   const f4 = $('#field-julg-recursal'); if(f4) f4.style.display = 'none';
   $$('input[name="and-julg"]').forEach(el=> el.checked = false);
+  const f6 = $('#field-merito'); if(f6) f6.style.display = 'none';
+  const tbm = $('#tbody-merito'); if(tbm) tbm.innerHTML = '<tr><td colspan="3">—</td></tr>';
   const f5 = $('#field-elo'); if(f5) f5.style.display = 'none';
   const elo = $('#and-elo'); if(elo) elo.value = '';
     }
@@ -590,6 +611,18 @@
       const julgVal = document.querySelector('input[name="and-julg"]:checked')?.value;
       if(fieldJulgVisible && julgVal){
         novo.julgamentoRecursal = julgVal;
+      }
+      // inclui decisões de mérito, se presentes
+      const fieldMeritoVisible = $('#field-merito') && getComputedStyle($('#field-merito')).display !== 'none';
+      if(fieldMeritoVisible){
+        const rows = $$('#tbody-merito select[data-merito="resultado"]');
+        const decisoes = rows.map(sel=>{
+          const cpf = sel.getAttribute('data-cpf');
+          const fatoIdx = Number(sel.getAttribute('data-fato-idx'));
+          const resultado = sel.value;
+          return resultado ? { cpf, fatoIdx, resultado } : null;
+        }).filter(Boolean);
+        if(decisoes.length){ novo.decisoesMerito = decisoes; }
       }
       // inclui número ELO se campo estiver visível e houver valor
       const fieldEloVisible = $('#field-elo') && getComputedStyle($('#field-elo')).display !== 'none';
@@ -665,6 +698,18 @@
           fieldJulg.style.display = showJulg ? '' : 'none';
           if(!showJulg){ $$('input[name="and-julg"]').forEach(el=> el.checked=false); }
         }
+        // Decisão de mérito -> tabela dinâmica de relações envolvido×fato
+        const showMerito = val === 'Decisão de mérito';
+        const fieldMerito = $('#field-merito');
+        if(fieldMerito){
+          fieldMerito.style.display = showMerito ? '' : 'none';
+          const tbm = $('#tbody-merito');
+          if(showMerito){
+            if(tbm) buildMeritoTable();
+          } else {
+            if(tbm) tbm.innerHTML = '<tr><td colspan="3">—</td></tr>';
+          }
+        }
         // Avocação pelo CNMP -> Número ELO
         const showElo = val === 'Avocação pelo CNMP';
         const fieldElo = $('#field-elo');
@@ -696,6 +741,38 @@
       }
       const eloInput = $('#and-elo');
       if(eloInput){ eloInput.addEventListener('input', (e)=>{ e.target.value = maskElo(e.target.value); }); }
+
+      // Monta a tabela de mérito (envolvido × fato)
+      function buildMeritoTable(){
+        const tbody = $('#tbody-merito');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        const p = state.procedimento || { envolvidos: [], fatos: [] };
+        const mapCpfNome = new Map((p.envolvidos||[]).map(e=>[e.cpf, e.nome]));
+        let count = 0;
+        (p.fatos||[]).forEach((f, idx)=>{
+          (f.envolvidos||[]).forEach(cpf=>{
+            const tr = document.createElement('tr');
+            const nome = mapCpfNome.get(cpf) || cpf;
+            tr.innerHTML = `
+              <td>${escapeHtml(nome)}</td>
+              <td>${escapeHtml(f.descricao||'')}</td>
+              <td>
+                <select data-merito="resultado" data-cpf="${escapeHtml(cpf)}" data-fato-idx="${idx}">
+                  <option value="">Selecione...</option>
+                  <option>Condenação</option>
+                  <option>Absolvição</option>
+                  <option>Extinção sem análise de mérito</option>
+                </select>
+              </td>`;
+            tbody.appendChild(tr);
+            count++;
+          });
+        });
+        if(count===0){
+          tbody.innerHTML = '<tr><td colspan="3">Nenhuma relação envolvido × fato encontrada.</td></tr>';
+        }
+      }
 
       // Limpeza na saída: revoga blob URLs
       window.addEventListener('beforeunload', ()=>{
