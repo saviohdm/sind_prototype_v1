@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIND • Consulta de Procedimentos</title>
+  <style>
+    :root{
+      --bg:#f9fafb; --text:#1f2937; --muted:#6b7280; --muted-2:#9ca3af; --white:#fff;
+      --red-900:#7f1d1d; --red-800:#991b1b; --red-700:#b91c1c; --red-50:#fef2f2;
+      --border:#e5e7eb; --card:#ffffff; --shadow: 0 10px 20px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
+      --green:#16a34a; --amber:#d97706; --blue:#1d4ed8;
+    }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--text) }
+    a{ color:var(--red-700); text-decoration:none } a:hover{ text-decoration:underline }
+
+    /* Layout */
+    .layout{ display:grid; grid-template-columns:260px 1fr; min-height:100dvh }
+
+    /* Sidebar */
+    aside{ background:var(--red-900); color:#fff; padding:24px 16px }
+    .brand{ display:flex; align-items:center; gap:12px; margin-bottom:18px }
+    .brand span{ font-weight:800; letter-spacing:.5px }
+    nav{ display:flex; flex-direction:column; gap:8px }
+    .nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; color:#fff }
+    .nav-item:hover{ background:rgba(255,255,255,.08) }
+    .nav-item--active{ background:rgba(255,255,255,.12) }
+    .nav-item svg{ width:16px; height:16px }
+
+    /* Main */
+    main{ padding:24px }
+    .header{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:16px }
+    .title{ margin:0; font-size:22px; font-weight:800; color:#111827 }
+    .muted{ color:var(--muted) }
+
+    /* Buttons */
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:600; border:1px solid transparent; padding:10px 18px; border-radius:14px; cursor:pointer; transition: background .2s, border-color .2s, color .2s, transform .02s; background:var(--red-700); color:#fff; box-shadow:var(--shadow) }
+    .btn:hover{ background:var(--red-800) } .btn:active{ transform:translateY(1px) }
+    .btn--outline{ background:#fff; color:var(--red-700); border-color:var(--red-700); box-shadow:none }
+    .btn--outline:hover{ background:var(--red-50) }
+    .btn--muted{ background:#f3f4f6; color:#374151; border-color:#e5e7eb; box-shadow:none }
+    .btn--sm{ padding:8px 12px; border-radius:10px; font-size:13px }
+
+    /* Cards */
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); margin-bottom:16px }
+    .card__head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px }
+    .card__body{ padding:16px }
+    .section-title{ margin:0; font-weight:700; font-size:18px; color:#374151; display:flex; align-items:center; gap:8px }
+
+    /* Form */
+    .form-grid{ display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:16px }
+    .field{ display:flex; flex-direction:column; gap:6px }
+    .label{ font-size:13px; font-weight:700; color:#374151 }
+    .hint{ font-size:12px; color:var(--muted-2) }
+    input[type="text"], input[type="date"], select{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:#fff; font-size:14px; color:#111827; outline:none }
+
+    .toolbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+    .toolbar .spacer{ flex:1 }
+
+    /* Results */
+    .table{ width:100%; border-collapse:collapse }
+    .table th, .table td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top }
+    .table th{ font-size:12px; color:#6b7280; font-weight:700; background:#f9fafb }
+    .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border); background:#fff; border-radius:999px; font-size:12px }
+    .status--andamento{ background:#eef2ff; color:var(--blue); border-color:#e5e7eb }
+    .status--suspenso{ background:#fffbeb; color:var(--amber); border-color:#fef3c7 }
+    .status--finalizado{ background:#ecfdf5; color:var(--green); border-color:#d1fae5 }
+
+    /* Collapsible */
+    details{ border:1px solid var(--border); border-radius:12px; background:#fff }
+    summary{ cursor:pointer; list-style:none; padding:10px 12px; font-weight:700 }
+    summary::-webkit-details-marker{ display:none }
+    details[open] summary{ border-bottom:1px solid var(--border) }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside>
+      <div class="brand">
+        <img src="/image.png" alt="CNMP" style="width:100px;height:auto" />
+        <span>SIND</span>
+      </div>
+      <nav>
+        <a class="nav-item" href="./index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12L12 4l8 8" />
+            <path d="M4 12v8h16v-8" />
+          </svg>
+          <span>Início</span>
+        </a>
+        <a class="nav-item" href="novo.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Novo Procedimento</span>
+        </a>
+        <a class="nav-item" href="acervo.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="13" rx="2"/>
+            <path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Acervo</span>
+        </a>
+        <a class="nav-item nav-item--active" aria-current="page" href="consulta.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>Consulta</span>
+        </a>
+        <a class="nav-item" href="mensagens.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="10" rx="2"/>
+            <polyline points="3 7 12 13 21 7"/>
+          </svg>
+          <span>Mensagens</span>
+        </a>
+        <a class="nav-item" href="estatistica.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="12" width="4" height="8"/>
+            <rect x="10" y="8" width="4" height="12"/>
+            <rect x="17" y="4" width="4" height="16"/>
+          </svg>
+          <span>Estatísticas</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <header class="header">
+        <h1 class="title">Consulta de procedimentos</h1>
+        <div class="muted" id="result-meta">—</div>
+      </header>
+
+      <!-- Filtros principais -->
+      <section class="card" aria-labelledby="filters-title">
+        <div class="card__head">
+          <h2 id="filters-title" class="section-title">Filtros de busca</h2>
+          <div class="toolbar">
+            <button class="btn btn--outline btn--sm" id="btn-clear">Limpar</button>
+            <button class="btn btn--sm" id="btn-search">Buscar</button>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="form-grid">
+            <div class="field">
+              <label class="label" for="f-ramo">Ramo (MP)</label>
+              <select id="f-ramo">
+                <option value="">Todos</option>
+                <option>MPBA</option>
+                <option>MPRO</option>
+                <option>MPTO</option>
+                <option>MPDFT</option>
+                <option>MPMG</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="label" for="f-numero">Número do procedimento</label>
+              <input id="f-numero" type="text" placeholder="Ex.: 2025.000123.000045" />
+            </div>
+            <div class="field">
+              <label class="label" for="f-classe">Classe</label>
+              <input id="f-classe" list="dl-classes" type="text" placeholder="Digite ou escolha..." />
+              <datalist id="dl-classes">
+                <option value="PAD - Processo Administrativo Disciplinar"></option>
+                <option value="Sindicância"></option>
+                <option value="Representação"></option>
+              </datalist>
+            </div>
+            <div class="field">
+              <label class="label" for="f-sigilo">Sigilo</label>
+              <select id="f-sigilo">
+                <option value="">Todos</option>
+                <option value="true">Ativo</option>
+                <option value="false">Inativo</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="label" for="f-datai">Data da autuação (início)</label>
+              <input id="f-datai" type="date" />
+            </div>
+            <div class="field">
+              <label class="label" for="f-dataf">Data da autuação (fim)</label>
+              <input id="f-dataf" type="date" />
+            </div>
+            <div class="field">
+              <label class="label" for="f-situacao">Situação</label>
+              <select id="f-situacao">
+                <option value="">Todas</option>
+                <option>em andamento</option>
+                <option>suspenso</option>
+                <option>finalizado</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="label" for="f-andamento">Descrição do andamento (contém)</label>
+              <input id="f-andamento" type="text" placeholder="Ex.: instauração, arquivamento" />
+            </div>
+          </div>
+
+          <details style="margin-top:16px">
+            <summary>Filtrar por envolvido (nome, CPF ou matrícula)</summary>
+            <div class="card__body" style="border:none; padding:16px 0 0 0">
+              <div class="form-grid">
+                <div class="field">
+                  <label class="label" for="f-env-nome">Nome</label>
+                  <input id="f-env-nome" type="text" placeholder="Ex.: Maria Souza" />
+                </div>
+                <div class="field">
+                  <label class="label" for="f-env-mat">Matrícula</label>
+                  <input id="f-env-mat" type="text" placeholder="Ex.: A1234" />
+                </div>
+                <div class="field">
+                  <label class="label" for="f-env-cpf">CPF</label>
+                  <input id="f-env-cpf" type="text" placeholder="Ex.: 123.456.789-00" />
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Resultados -->
+      <section class="card" aria-labelledby="res-title">
+        <div class="card__head">
+          <h2 id="res-title" class="section-title">Resultados</h2>
+          <div class="toolbar">
+            <div class="spacer"></div>
+            <button class="btn btn--outline btn--sm" id="btn-export" title="Exportar CSV dos resultados">Exportar CSV</button>
+          </div>
+        </div>
+        <div class="card__body">
+          <table class="table" aria-describedby="res-title">
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Envolvido</th>
+                <th>Classe</th>
+                <th>Situação</th>
+                <th>Data da autuação</th>
+                <th>Duração (dias)</th>
+                <th>Último andamento</th>
+                <th>Dias sem andamento</th>
+                <th>Dias para prescrever</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-results"><tr><td colspan="10">Faça uma busca para ver resultados.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // ---------- Utils ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const parseISO = (s) => { const d = new Date(s); return isNaN(+d) ? null : d };
+    const fmtBR = (iso) => { if(!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}` };
+    const daysBetween = (a,b) => Math.round((+b - +a)/86400000);
+    const norm = (s) => (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const csvEscape = (v) => '"'+String(v??'').replace(/"/g,'""')+'"';
+
+    // ---------- Storage / Seed ----------
+    function readProcedures(){
+      try{
+        const raw = localStorage.getItem('procedimentos');
+        if(raw){ return JSON.parse(raw); }
+      }catch(e){}
+      const seed = [
+        {
+          id:'P-2025-0001', ramo:'MPBA', numero:'2025.000123.000045', classe:'PAD - Processo Administrativo Disciplinar', sigilo:true,
+          dataAutuacao:'2025-07-12', situacao:'em andamento',
+          envolvidos:[ {nome:'Maria Souza', matricula:'A1234', cpf:'123.456.789-00'}, {nome:'João Silva', matricula:'B8790', cpf:'987.654.321-00'} ],
+          fatos:[ {descricao:'Suposta infração', capitulacao:'Lei 8.112/90 - Art. 116', dataFato:'2025-05-10', dataPrescricao:'2027-05-10', envolvidos:['123.456.789-00']} ],
+          andamentos:[ {descricao:'Instauração', data:'2025-07-15'}, {descricao:'Sobreestamento', data:'2025-08-10'} ]
+        },
+        {
+          id:'P-2024-0007', ramo:'MPRO', numero:'2024.000007.000321', classe:'Sindicância', sigilo:false,
+          dataAutuacao:'2024-11-20', situacao:'suspenso',
+          envolvidos:[ {nome:'Ana Pereira', matricula:'C3321', cpf:'111.222.333-44'} ],
+          fatos:[ {descricao:'Descumprimento de prazo', capitulacao:'Lei 8.112/90 - Art. 117', dataFato:'2024-10-02', dataPrescricao:'2026-10-02', envolvidos:['111.222.333-44']} ],
+          andamentos:[ {descricao:'Instauração', data:'2024-11-25'}, {descricao:'Suspensão', data:'2024-12-15'} ]
+        },
+        {
+          id:'P-2023-0042', ramo:'MPTO', numero:'2023.000042.000999', classe:'Representação', sigilo:false,
+          dataAutuacao:'2023-03-05', situacao:'finalizado',
+          envolvidos:[ {nome:'Carlos Lima', matricula:'D7788', cpf:'555.666.777-88'}, {nome:'Paula Braga', matricula:'E1122', cpf:'222.333.444-55'} ],
+          fatos:[ {descricao:'Arquivamento por improcedência', capitulacao:'—', dataFato:'2023-02-10', dataPrescricao:'2025-02-10', envolvidos:['555.666.777-88','222.333.444-55']} ],
+          andamentos:[ {descricao:'Instauração', data:'2023-03-10'}, {descricao:'Arquivamento', data:'2023-04-20'} ]
+        }
+      ];
+      try{ localStorage.setItem('procedimentos', JSON.stringify(seed)); }catch(e){}
+      return seed;
+    }
+
+    // ---------- Search ----------
+    function filterProcedures(list){
+      const ramo = $('#f-ramo').value;
+      const numero = norm($('#f-numero').value);
+      const classe = norm($('#f-classe').value);
+      const sigilo = $('#f-sigilo').value; // '', 'true', 'false'
+      const dI = $('#f-datai').value; const dF = $('#f-dataf').value;
+      const sit = $('#f-situacao').value; // '', 'em andamento', 'suspenso', 'finalizado'
+      const andTxt = norm($('#f-andamento').value);
+      const envNome = norm($('#f-env-nome').value);
+      const envMat = norm($('#f-env-mat').value);
+      const envCpf = norm($('#f-env-cpf').value);
+
+      return list.filter(p=>{
+        if(ramo && p.ramo !== ramo) return false;
+        if(numero && !norm(p.numero).includes(numero)) return false;
+        if(classe && !norm(p.classe).includes(classe)) return false;
+        if(sigilo){ const want = sigilo === 'true'; if(!!p.sigilo !== want) return false; }
+        if(sit && p.situacao !== sit) return false;
+        if(dI){ const di = parseISO(dI); const pa = parseISO(p.dataAutuacao); if(!pa || pa < di) return false; }
+        if(dF){ const df = parseISO(dF); const pa = parseISO(p.dataAutuacao); if(!pa || pa > df) return false; }
+        if(andTxt){
+          const has = (p.andamentos||[]).some(a => norm(a.descricao).includes(andTxt));
+          if(!has) return false;
+        }
+        if(envNome || envMat || envCpf){
+          const ok = (p.envolvidos||[]).some(e =>
+            (!envNome || norm(e.nome).includes(envNome)) &&
+            (!envMat || norm(e.matricula).includes(envMat)) &&
+            (!envCpf || norm(e.cpf).includes(envCpf))
+          );
+          if(!ok) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderResults(rows){
+      const tbody = $('#tbody-results');
+      tbody.innerHTML = '';
+      if(!rows.length){ tbody.innerHTML = '<tr><td colspan="10">Nenhum procedimento encontrado.</td></tr>'; return; }
+
+      const now = new Date();
+      rows.forEach(p=>{
+        const primeirosEnvolvidos = (p.envolvidos||[]);
+        const primeiro = primeirosEnvolvidos[0]?.nome || '—';
+        const outros = (primeirosEnvolvidos.length>1) ? ' ...' : '';
+        const dataAut = parseISO(p.dataAutuacao);
+        const duracao = dataAut ? daysBetween(dataAut, now) : '';
+        const lastAnd = (p.andamentos||[]).map(a=>a.data).sort().slice(-1)[0] || '';
+        const lastDate = lastAnd ? parseISO(lastAnd) : null;
+        const diasSem = lastDate ? daysBetween(lastDate, now) : '';
+        const proximPresc = (p.fatos||[]).map(f=>f.dataPrescricao).filter(Boolean).sort()[0] || '';
+        const diasPresc = proximPresc ? daysBetween(now, parseISO(proximPresc)) : '';
+
+        const sitClass = p.situacao==='em andamento' ? 'status--andamento' : (p.situacao==='suspenso' ? 'status--suspenso' : 'status--finalizado');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(p.numero)}</td>
+          <td>${escapeHtml(primeiro)}${outros}</td>
+          <td>${escapeHtml(p.classe||'')}</td>
+          <td><span class="badge ${sitClass}">${escapeHtml(p.situacao[0].toUpperCase()+p.situacao.slice(1))}</span></td>
+          <td>${fmtBR(p.dataAutuacao)}</td>
+          <td>${duracao}</td>
+          <td>${lastAnd ? fmtBR(lastAnd) : '—'}</td>
+          <td>${diasSem!=='' ? diasSem : '—'}</td>
+          <td>${diasPresc!=='' ? diasPresc : '—'}</td>
+          <td>
+            <button class="btn btn--muted btn--sm" data-id="${p.id}" data-action="view">Ver</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // bind buttons
+      $$('button[data-action="view"]').forEach(b=>{
+        b.addEventListener('click', ev=>{
+          const id = ev.currentTarget.getAttribute('data-id');
+          try{ localStorage.setItem('visualizarSelecionadoId', id); }catch(e){}
+          window.location.href = './visualizar.html?id=' + encodeURIComponent(id);
+        });
+      });
+    }
+
+    function updateMeta(total, shown){
+      $('#result-meta').textContent = `${shown} resultado(s) de ${total}`;
+    }
+
+    function clearFilters(){
+      $('#f-ramo').value=''; $('#f-numero').value=''; $('#f-classe').value=''; $('#f-sigilo').value='';
+      $('#f-datai').value=''; $('#f-dataf').value=''; $('#f-situacao').value=''; $('#f-andamento').value='';
+      $('#f-env-nome').value=''; $('#f-env-mat').value=''; $('#f-env-cpf').value='';
+      $('#tbody-results').innerHTML = '<tr><td colspan="10">Faça uma busca para ver resultados.</td></tr>';
+      updateMeta(allProcedures.length, 0);
+    }
+
+    function exportCSV(rows){
+      const headers = ['Numero','Ramo','Classe','Situacao','Sigilo','DataAutuacao','Envolvido','UltimoAndamento','DiasSemAndamento','DiasParaPrescrever'];
+      const now = new Date();
+      const lines = [headers.map(csvEscape).join(',')];
+      rows.forEach(p=>{
+        const env = (p.envolvidos?.[0]?.nome||'') + ((p.envolvidos?.length||0)>1 ? ' ...' : '');
+        const lastAnd = (p.andamentos||[]).map(a=>a.data).sort().slice(-1)[0] || '';
+        const lastDate = lastAnd ? parseISO(lastAnd) : null;
+        const diasSem = lastDate ? daysBetween(lastDate, now) : '';
+        const proximPresc = (p.fatos||[]).map(f=>f.dataPrescricao).filter(Boolean).sort()[0] || '';
+        const diasPresc = proximPresc ? daysBetween(now, parseISO(proximPresc)) : '';
+        const row = [p.numero,p.ramo,p.classe,p.situacao, p.sigilo?'Ativo':'Inativo', p.dataAutuacao, env, lastAnd, diasSem, diasPresc];
+        lines.push(row.map(csvEscape).join(','));
+      });
+      const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'consulta-resultados.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    }
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]) ); }
+
+    // ---------- Boot ----------
+    let allProcedures = [];
+    window.addEventListener('DOMContentLoaded', ()=>{
+      allProcedures = readProcedures();
+      updateMeta(allProcedures.length, 0);
+
+      $('#btn-search').addEventListener('click', ()=>{
+        const rows = filterProcedures(allProcedures);
+        renderResults(rows);
+        updateMeta(allProcedures.length, rows.length);
+      });
+      $('#btn-clear').addEventListener('click', clearFilters);
+      $('#btn-export').addEventListener('click', ()=>{
+        const rows = filterProcedures(allProcedures);
+        if(!rows.length){ alert('Nenhum resultado para exportar.'); return; }
+        exportCSV(rows);
+      });
+
+      // Submit com Enter em qualquer input
+      $$('input, select').forEach(el=>{
+        el.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); $('#btn-search').click(); } });
+      });
+    });
+  </script>
+</body>
+</html>

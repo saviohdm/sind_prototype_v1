@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIND • Acervo do MPRO (Vanilla)</title>
+  <style>
+    :root{
+      --bg: #f9fafb;            /* cinza claro */
+      --text: #1f2937;          /* cinza-escuro */
+      --muted: #6b7280;         /* cinza */
+      --muted-2:#9ca3af;
+      --white:#ffffff;
+      --red-900:#7f1d1d;
+      --red-850:#8b1b1b;
+      --red-800:#991b1b;
+      --red-700:#b91c1c;
+      --red-50:#fef2f2;
+      --border:#e5e7eb;
+      --card:#ffffff;
+      --green:#16a34a;
+      --red:#dc2626;
+      --amber:#d97706;
+      --shadow: 0 10px 20px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --gap: 24px;
+    }
+
+    /* Reset básico */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    img{display:block; max-width:100%; height:auto}
+    h1,h2{margin:0 0 .5rem}
+    a{color:inherit; text-decoration:none}
+
+    /* Layout */
+    .layout{ display:grid; grid-template-columns: 260px 1fr; min-height:100vh }
+    aside{
+      background:var(--red-900); color:var(--white); padding:24px;
+      display:flex; flex-direction:column; gap:24px; position:sticky; top:0; height:100vh;
+    }
+    .brand{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:18px }
+
+    nav{ display:flex; flex-direction:column; gap:12px }
+    nav .nav-item, nav .nav-item[type="button"] {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: background .2s;
+      background: none;
+      border: none;
+      color: inherit;
+      font: inherit;
+    }
+    .nav-item:hover{ background:var(--red-800) }
+    .nav-item--active{ background:var(--red-850) }
+    .nav-item svg, .stat svg, .meta svg{ width:16px; height:16px; flex:0 0 16px }
+
+    main{ padding:40px; display:flex; flex-direction:column; gap:28px }
+
+    /* Header */
+    .header{ display:flex; align-items:center; justify-content:space-between; gap:16px }
+    .title{ font-size:28px; font-weight:800; color:#111827 }
+
+    /* Botões */
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:600; border:1px solid transparent; padding:10px 18px; border-radius:14px; cursor:pointer; transition: background .2s, border-color .2s, color .2s, transform .02s; background:var(--red-700); color:var(--white); box-shadow:var(--shadow) }
+    .btn:hover{ background:var(--red-800) }
+    .btn:active{ transform:translateY(1px) }
+    .btn--outline{ background:var(--white); color:var(--red-700); border-color:var(--red-700); box-shadow:none }
+    .btn--outline:hover{ background:var(--red-50) }
+
+    /* Card genérico */
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow); overflow:hidden }
+    .card__content{ padding:16px 16px 20px }
+
+    /* Seção */
+    .section-title{ font-weight:700; font-size:20px; color:#374151; margin-bottom:12px; display:flex; align-items:center; gap:8px }
+
+    /* Tabela */
+    .table-wrap{ border-radius:var(--radius-lg); overflow:auto; border:1px solid var(--border) }
+    table{ width:100%; border-collapse:collapse; font-size:14px; background:var(--white) }
+    thead th{ text-align:left; padding:12px; background:#f3f4f6; color:#4b5563; font-weight:600; position:sticky; top:0; z-index:1; white-space:nowrap }
+    tbody td{ padding:12px; border-top:1px solid var(--border); vertical-align:top }
+    tbody tr:hover{ background:#fafafa }
+    td.num, td.center{ text-align:center }
+    td.right{ text-align:right }
+
+    /* Priorize largura para Envolvido e Classe */
+    table th:nth-child(2), /* Envolvido */
+    table th:nth-child(3), /* Classe */
+    table td:nth-child(2),
+    table td:nth-child(3) {
+      width: 220px;
+      min-width: 180px;
+      max-width: 260px;
+      word-break: break-word;
+    }
+
+    /* Reduza largura das demais colunas */
+    table th:nth-child(1), /* Número */
+    table td:nth-child(1) {
+      width: 140px;
+      min-width: 100px;
+      max-width: 140px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    table th:nth-child(4), /* Data da autuação */
+    table td:nth-child(4),
+    table th:nth-child(6), /* Último andamento */
+    table td:nth-child(6) {
+      width: 140px;
+      min-width: 90px;
+      max-width: 120px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    table th:nth-child(5), /* Duração (dias) */
+    table td:nth-child(5),
+    table th:nth-child(7), /* Dias sem andamento */
+    table td:nth-child(7),
+    table th:nth-child(8), /* Dias para prescrever */
+    table td:nth-child(8) {
+      width: 160px;
+      min-width: 60px;
+      max-width: 90px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .status{ display:inline-flex; align-items:center; gap:6px }
+    .dot{ display:inline-block; width:8px; height:8px; border-radius:999px; background:currentColor }
+    .status--ok{ color:var(--green) }
+    .status--err{ color:var(--red) }
+    .status--warn{ color:var(--amber) }
+
+    .kpi-badge{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:999px; border:1px solid var(--border); background:#fbfbfb }
+
+    .toolbar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+    .toolbar input[type="search"]{ padding:10px 12px; border:1px solid var(--border); border-radius:12px; outline:none; min-width:220px }
+
+    th.sortable {
+      user-select: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    th.sortable:hover {
+      background: #fce7e7;
+    }
+    th.sorted-asc, th.sorted-desc { background: #f9f5f0; }
+
+    @media (max-width: 1024px){ .layout{ grid-template-columns: 220px 1fr } }
+    @media (max-width: 840px){ .layout{ grid-template-columns: 1fr } main{ padding:24px } }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside>
+      <div class="brand">
+        <img src="/image.png" alt="CNMP" style="width:100px; height:auto" />
+        <span>SIND</span>
+      </div>
+      <nav>
+        <a class="nav-item" href="./index.html" aria-label="Início">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12L12 4l8 8"/><path d="M4 12v8h16v-8"/></svg>
+          <span>Início</span>
+        </a>
+        <a class="nav-item" href="novo.html" aria-label="Novo Procedimento">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Novo Procedimento</span>
+        </a>
+        <a class="nav-item nav-item--active" href="#" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="13" rx="2"/>
+            <path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Acervo</span>
+        </a>
+        <a class="nav-item" href="consulta.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>Consulta</span>
+        </a>
+        <a class="nav-item" href="mensagens.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="10" rx="2"/>
+            <polyline points="3 7 12 13 21 7"/>
+          </svg>
+          <span>Mensagens</span>
+        </a>
+        <a class="nav-item" href="estatistica.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="12" width="4" height="8"/>
+            <rect x="10" y="8" width="4" height="12"/>
+            <rect x="17" y="4" width="4" height="16"/>
+          </svg>
+          <span>Estatísticas</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <header class="header">
+        <h1 class="title">Acervo do MPRO</h1>
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="Buscar número, envolvido, classe…" aria-label="Buscar no acervo" />
+          <button class="btn btn--outline" id="btn-export" type="button">Exportar CSV</button>
+        </div>
+      </header>
+
+      <section>
+        <div class="card">
+          <div class="card__content">
+            <h2 class="section-title">Lista de Procedimentos em Andamento</h2>
+            <div class="table-wrap">
+              <table aria-describedby="LegendaPrescricao">
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Envolvido</th>
+                    <th class="sortable" data-sort="classe">Classe <span class="sort-indicator" style="font-size:10px"></span></th>
+                    <th>Data da autuação</th>
+                    <th class="center sortable" data-sort="duracao">Duração (dias) <span class="sort-indicator" style="font-size:10px"></span></th>
+                    <th>Último andamento</th>
+                    <th class="center sortable" data-sort="diasSem">Dias sem andamento <span class="sort-indicator" style="font-size:10px"></span></th>
+                    <th class="center sortable" data-sort="diasPresc">Dias para prescrever <span class="sort-indicator" style="font-size:10px"></span></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-acervo"></tbody>
+              </table>
+            </div>
+            <p id="LegendaPrescricao" style="font-size:12px; color:var(--muted-2); margin-top:8px">
+              "Dias para prescrever" mostra <strong>data atual − data da prescrição</strong> (valor negativo indica dias faltantes; positivo indica dias ultrapassados). Quando houver múltiplas prescrições, considera-se a mais próxima ao dia de hoje.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ===== Utilidades de data (formato BR: DD/MM/AAAA ou DD-MM-AAAA) =====
+    const MS_DIA = 24*60*60*1000;
+    const hoje = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
+
+    function parseDateBR(str){
+      if(!str) return null;
+      const s = String(str).trim().replaceAll('-', '/');
+      const [dd, mm, yyyy] = s.split('/').map(n => parseInt(n, 10));
+      if(!dd || !mm || !yyyy) return null;
+      const d = new Date(yyyy, mm-1, dd); d.setHours(0,0,0,0); return d;
+    }
+    function diasEntre(a, b){ // a - b, em dias inteiros
+      if(!a || !b) return null;
+      return Math.floor((a.getTime() - b.getTime()) / MS_DIA);
+    }
+    function formatDateBR(d){ if(!d) return '—'; return d.toLocaleDateString('pt-BR'); }
+
+    // ===== Dados de exemplo (mock) =====
+    // Observação: "envolvidos" aceita múltiplos nomes; renderizamos apenas o primeiro + "..." quando houver mais de um.
+    const dados = [
+      {
+        numero: '003.9.1234567/2025',
+        envolvidos: ['Adoniran Barbosa'],
+        classe: 'Reclamação',
+        situacao: 'Em andamento',
+        autuacao: '05/12/2024',
+        ultimoAndamento: '01/08/2025',
+        prescricoes: ['15/11/2025']
+      },
+      {
+        numero: '003.9.532343/2025',
+        envolvidos: ['Milton Melo', 'Rita de Cássia'],
+        classe: 'Notícia de Fato',
+        situacao: 'Em andamento',
+        autuacao: '17/05/2024',
+        ultimoAndamento: '17/05/2025',
+        prescricoes: ['01/09/2026']
+      },
+      {
+        numero: '003.9.5234534/2025',
+        envolvidos: ['Carmen Miranda', 'Hélio Souza'],
+        classe: 'Reclamação',
+        situacao: 'Em andamento',
+        autuacao: '12/03/2025',
+        ultimoAndamento: '18/08/2025',
+        prescricoes: ['12/09/2028']
+      },
+      {
+        numero: '003.9.736453/2025',
+        envolvidos: ['Álvares Cabral'],
+        classe: 'Procedimento Administrativo Disciplinar',
+        situacao: 'Em andamento',
+        autuacao: '09/08/2024',
+        ultimoAndamento: '09/08/2024',
+        prescricoes: ['09/08/2025','09/08/2026']
+      },
+      {
+        numero: '003.9.1234568/2025',
+        envolvidos: ['Rebeca Ramos', 'Fulano da Silva'],
+        classe: 'Notícia de Fato',
+        situacao: 'Encerrado',
+        autuacao: '10/10/2024',
+        ultimoAndamento: '12/12/2024',
+        prescricoes: ['12/12/2026']
+      },
+      {
+        numero: '003.9.8765432/2025',
+        envolvidos: ['João Gilberto'],
+        classe: 'Sindicato',
+        situacao: 'Em andamento',
+        autuacao: '22/03/2025',
+        ultimoAndamento: '25/07/2025',
+        prescricoes: ['22/03/2026']
+      },
+      {
+        numero: '003.9.6543210/2025',
+        envolvidos: ['Maria Bethânia', 'Gal Costa'],
+        classe: 'Reclamação',
+        situacao: 'Em andamento',
+        autuacao: '30/01/2025',
+        ultimoAndamento: '10/06/2025',
+        prescricoes: ['30/01/2027']
+      },
+      {
+        numero: '003.9.1122334/2025',
+        envolvidos: ['Chico Buarque'],
+        classe: 'Procedimento Administrativo Disciplinar',
+        situacao: 'Encerrado',
+        autuacao: '15/04/2024',
+        ultimoAndamento: '20/05/2024',
+        prescricoes: ['15/04/2025']
+      }
+    ];
+
+    // ===== Lógica de apresentação =====
+    function classStatus(txt){
+      const t = (txt||'').toLowerCase();
+      if(t.includes('encerrado')) return 'status--err';
+      if(t.includes('andamento')) return 'status--ok';
+      return 'status--warn';
+    }
+
+    function primeiroEnvolvido(lista){
+      if(!lista || !lista.length) return '—';
+      return lista.length > 1 ? `${lista[0]}…` : lista[0];
+    }
+
+    function prescricaoMaisProxima(datas){
+      // Preferir a próxima no futuro; se não houver, escolher a mais recente no passado
+      const list = (datas||[]).map(parseDateBR).filter(Boolean);
+      if(!list.length) return null;
+      const futuros = list.filter(d => d.getTime() >= hoje.getTime());
+      if(futuros.length){
+        return futuros.sort((a,b)=>a-b)[0];
+      } else {
+        return list.sort((a,b)=>b-a)[0]; // passado mais recente
+      }
+    }
+
+    function renderTabela(items){
+      const tbody = document.getElementById('tbody-acervo');
+      tbody.innerHTML = items.map(row => {
+        const dAut = parseDateBR(row.autuacao);
+        const dUlt = parseDateBR(row.ultimoAndamento);
+        const dPres = prescricaoMaisProxima(row.prescricoes);
+
+        const duracao = diasEntre(hoje, dAut);
+        const diasSem = diasEntre(hoje, dUlt);
+        const diasPresc = dPres ? diasEntre(hoje, dPres) : null; // pode ser negativo
+
+        const statusCls = classStatus(row.situacao);
+        const envolvidoTxt = primeiroEnvolvido(row.envolvidos);
+        const envolvidoTitle = (row.envolvidos||[]).join(', ');
+
+        const prescTooltip = dPres ? `title="Prescrição considerada: ${formatDateBR(dPres)}"` : '';
+
+        // Destaque de alerta para duração > 365 dias
+        const duracaoHtml = duracao > 365
+          ? `<span class="kpi-badge status--err" title="Mais de 1 ano">${duracao}</span>`
+          : `<span class="kpi-badge">${duracao ?? '—'}</span>`;
+
+        // Destaque de alerta para dias sem andamento > 30 dias
+        const diasSemHtml = diasSem > 30
+          ? `<span class="kpi-badge status--err" title="Mais de 30 dias sem andamento">${diasSem}</span>`
+          : `<span class="kpi-badge">${diasSem ?? '—'}</span>`;
+
+        // Destaque de alerta para dias para prescrever positivos
+        const prescBadge = (diasPresc == null)
+          ? '<span class="kpi-badge">—</span>'
+          : diasPresc > 0
+            ? `<span class="kpi-badge status--err" ${prescTooltip} title="Prescrição ultrapassada">+${diasPresc}</span>`
+            : `<span class="kpi-badge" ${prescTooltip}>${diasPresc}</span>`;
+
+        return `
+          <tr>
+            <td>
+              <a href="detalhes.html?numero=${encodeURIComponent(row.numero||'')}" style="color:inherit;text-decoration:none" title="Ver detalhes do procedimento">
+                ${row.numero||'—'}
+              </a>
+            </td>
+            <td title="${envolvidoTitle}">${envolvidoTxt}</td>
+            <td>${row.classe||'—'}</td>
+            <td class="num">${row.autuacao||'—'}</td>
+            <td class="center">${duracaoHtml}</td>
+            <td class="num">${row.ultimoAndamento||'—'}</td>
+            <td class="center">${diasSemHtml}</td>
+            <td class="center">${prescBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ===== Busca simples =====
+    function normaliza(s){ return (s||'').toString().normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase(); }
+    function aplicaBusca(){
+      const q = normaliza(document.getElementById('search').value);
+      if(!q){ renderTabela(dados); return; }
+      const filtrados = dados.filter(d => {
+        return [d.numero, (d.envolvidos||[]).join(' '), d.classe, d.situacao]
+          .some(v => normaliza(v).includes(q));
+      });
+      renderTabela(filtrados);
+    }
+
+    // ===== Exportar CSV =====
+    function toCSV(rows){
+      const header = ['Numero','Envolvido(1º+…)','Classe','Situacao','DataAutuacao','Duracao(dias)','UltimoAndamento','DiasSemAndamento','DiasParaPrescrever(hoje−data)'];
+      const linhas = rows.map(r => {
+        const dAut = parseDateBR(r.autuacao);
+        const dUlt = parseDateBR(r.ultimoAndamento);
+        const dPres = prescricaoMaisProxima(r.prescricoes);
+        const duracao = diasEntre(hoje, dAut);
+        const diasSem = diasEntre(hoje, dUlt);
+        const diasPresc = dPres ? diasEntre(hoje, dPres) : '';
+        const env = primeiroEnvolvido(r.envolvidos);
+        return [r.numero, env, r.classe, r.situacao, r.autuacao, duracao, r.ultimoAndamento, diasSem, diasPresc].map(v => `"${String(v??'').replaceAll('"','""')}"`).join(',');
+      });
+      return [header.join(','), ...linhas].join('\n');
+    }
+    function downloadCSV(){
+      const csv = toCSV(dados);
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'acervo-mpro.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== Ordenação =====
+    // Estado de ordenação
+    let sortCol = null;
+    let sortDir = 1; // 1 = crescente, -1 = decrescente
+
+    function sortTable(colKey) {
+      if (sortCol === colKey) {
+        sortDir *= -1; // alterna direção
+      } else {
+        sortCol = colKey;
+        sortDir = 1;
+      }
+      const sorted = [...dados].sort((a, b) => {
+        // Calcula valores para cada coluna
+        function getValue(row) {
+          const dAut = parseDateBR(row.autuacao);
+          const dUlt = parseDateBR(row.ultimoAndamento);
+          const dPres = prescricaoMaisProxima(row.prescricoes);
+          if (colKey === 'duracao') return diasEntre(hoje, dAut) ?? 0;
+          if (colKey === 'diasSem') return diasEntre(hoje, dUlt) ?? 0;
+          if (colKey === 'diasPresc') return dPres ? diasEntre(hoje, dPres) : 0;
+          if (colKey === 'classe') return (row.classe || '').toLowerCase();
+          return 0;
+        }
+        if (colKey === 'classe') {
+          // Ordenação alfabética
+          return getValue(a).localeCompare(getValue(b)) * sortDir;
+        }
+        return (getValue(a) - getValue(b)) * sortDir;
+      });
+      renderTabela(sorted);
+      updateSortIndicators();
+    }
+
+    function updateSortIndicators() {
+      // Remove indicadores antigos
+      document.querySelectorAll('.sortable').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        th.querySelector('.sort-indicator').textContent = '';
+      });
+      // Adiciona indicador na coluna ativa
+      if (sortCol) {
+        const th = document.querySelector(`th[data-sort="${sortCol}"]`);
+        if (th) {
+          th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+          th.querySelector('.sort-indicator').textContent = sortDir === 1 ? '▲' : '▼';
+        }
+      }
+    }
+
+    // ===== Eventos =====
+    renderTabela(dados);
+    document.getElementById('search').addEventListener('input', aplicaBusca);
+    document.getElementById('btn-export').addEventListener('click', downloadCSV);
+
+    // Adiciona evento aos cabeçalhos após DOM pronto
+    window.addEventListener('DOMContentLoaded', () => {
+      ['duracao', 'diasSem', 'diasPresc', 'classe'].forEach(col => {
+        const th = document.querySelector(`th[data-sort="${col}"]`);
+        if (th) th.addEventListener('click', () => sortTable(col));
+      });
+      updateSortIndicators();
+    });
+  </script>
+</body>
+</html>

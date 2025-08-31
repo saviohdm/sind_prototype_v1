@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIND • Novo Procedimento (Vanilla)</title>
+  <style>
+    :root{
+      --bg: #f9fafb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --muted-2:#9ca3af;
+      --white:#ffffff;
+      --red-900:#7f1d1d;
+      --red-800:#991b1b;
+      --red-700:#b91c1c;
+      --red-50:#fef2f2;
+      --border:#e5e7eb;
+      --card:#ffffff;
+      --green:#16a34a;
+      --red:#dc2626;
+      --shadow: 0 10px 20px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --gap: 24px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:var(--bg);
+    }
+    img{display:block; max-width:100%; height:auto}
+    h1,h2{margin:0 0 .5rem}
+
+    /* Layout principal */
+    .layout{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      min-height:100vh;
+      background:var(--bg);
+    }
+    aside{
+      background:var(--red-900);
+      color:var(--white);
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:24px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:8px;
+      font-weight:700; font-size:18px;
+    }
+    nav{display:flex; flex-direction:column; gap:12px}
+    .nav-item{
+      display:flex; align-items:center; gap:12px;
+      padding:10px 12px; border-radius:10px; cursor:pointer;
+      transition: background .2s ease;
+      user-select:none;
+    }
+    .nav-item:hover{ background:var(--red-800) }
+    .nav-item.active{ background:var(--red-800) }
+    .nav-item svg, .stat svg, .meta svg{ width:16px; height:16px; flex:0 0 16px }
+
+    main{ padding:40px; display:flex; flex-direction:column; gap:32px; }
+    .header{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .title{ font-size:28px; font-weight:800; color:#111827 }
+
+    /* Botões */
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px; font-weight:600; border:1px solid transparent;
+      padding:10px 18px; border-radius:14px; cursor:pointer;
+      transition: background .2s, border-color .2s, color .2s, transform .02s;
+      background:var(--red-700); color:var(--white); box-shadow:var(--shadow);
+    }
+    .btn:hover{ background:var(--red-800) }
+    .btn:active{ transform:translateY(1px) }
+    .btn--outline{
+      background:var(--white); color:var(--red-700);
+      border-color:var(--red-700); box-shadow:none;
+    }
+    .btn--outline:hover{ background:var(--red-50) }
+    .btn--muted{
+      background:#f3f4f6; color:#374151; border-color:#e5e7eb; box-shadow:none;
+    }
+
+    /* Card genérico */
+    .card{
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius-xl); box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card__head{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 16px 0 16px;
+    }
+    .card__content{ padding:16px 16px 20px }
+
+    .section-title{
+      font-weight:700; font-size:20px; color:#374151; margin-bottom:12px;
+      display:flex; align-items:center; gap:8px;
+    }
+
+    /* Form */
+    .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .form-grid-3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    .label{ font-size:13px; font-weight:600; color:#374151; }
+    .req{ color:var(--red) }
+    .hint{ font-size:12px; color:var(--muted-2) }
+    input[type="text"], input[type="date"], input[type="file"], select, .combobox{
+      width:100%; padding:10px 12px; border:1px solid var(--border);
+      border-radius:12px; background:var(--white); font-size:14px; color:#111827;
+      outline:none;
+    }
+    input[type="text"]:focus, input[type="date"]:focus, select:focus, .combobox:focus{
+      border-color:#cbd5e1; box-shadow:0 0 0 4px rgba(0,0,0,.03);
+    }
+
+    /* Toggle */
+    .toggle{ display:inline-flex; align-items:center; gap:10px; cursor:pointer; }
+    .toggle input{ display:none; }
+    .switch{
+      width:44px; height:24px; border-radius:999px; position:relative;
+      background:#e5e7eb; transition:background .2s, box-shadow .2s;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+    }
+    .knob{
+      width:20px; height:20px; border-radius:50%; background:white;
+      position:absolute; top:2px; left:2px; transition:left .2s;
+      box-shadow:0 1px 2px rgba(0,0,0,.2);
+    }
+    .toggle input:checked + .switch{ background:var(--red-700) }
+    .toggle input:checked + .switch .knob{ left:22px }
+
+    .row-actions{ display:flex; gap:8px; flex-wrap:wrap }
+
+    /* Tabelas internas (Envolvidos/Fatos) */
+    .table-wrap{ border-radius:var(--radius-lg); overflow:auto; border:1px solid var(--border) }
+    table{ width:100%; border-collapse:collapse; font-size:14px; background:var(--white) }
+    thead th{
+      text-align:left; padding:12px; background:#f3f4f6; color:#4b5563; font-weight:600;
+      position:sticky; top:0; z-index:1;
+    }
+    tbody td{ padding:12px; border-top:1px solid var(--border) }
+    tbody tr:hover{ background:#fafafa }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:6px; padding:4px 8px;
+      border:1px solid var(--border); background:#fff; border-radius:999px;
+      font-size:12px; color:#374151;
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed; inset:0; background:rgba(0,0,0,.4);
+      display:none; align-items:center; justify-content:center; padding:16px;
+      z-index:50;
+    }
+    .modal.open{ display:flex }
+    .dialog{
+      width:min(960px, 100%); background:#fff; border-radius:16px;
+      border:1px solid var(--border); box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .dialog__head{
+      padding:14px 16px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+    }
+    .dialog__title{ font-weight:700; color:#111827 }
+    .dialog__body{ padding:16px; display:grid; gap:12px }
+    .right{ text-align:right; margin-top:12px }
+
+    /* Responsividade */
+    @media (max-width: 1024px){
+      .layout{ grid-template-columns: 220px 1fr }
+    }
+    @media (max-width: 840px){
+      .layout{ grid-template-columns: 1fr }
+      aside{ position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,.1) }
+      main{ padding:24px }
+      .form-grid, .form-grid-3{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside>
+      <div class="brand">
+        <img src="/image.png" alt="CNMP" style="width:100px; height:auto" />
+        <span>SIND</span>
+      </div>
+
+      <nav>
+        <div class="nav-item" onclick="window.location.href='index.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12L12 4l8 8"/>
+            <path d="M4 12v8h16v-8"/>
+          </svg>
+          <span>Início</span>
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Novo Procedimento</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='acervo.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="13" rx="2"/>
+            <path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Acervo</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='consulta.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>Consulta</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='mensagens.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="10" rx="2"/>
+            <polyline points="3 7 12 13 21 7"/>
+          </svg>
+          <span>Mensagens</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='estatistica.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="12" width="4" height="8"/>
+            <rect x="10" y="8" width="4" height="12"/>
+            <rect x="17" y="4" width="4" height="16"/>
+          </svg>
+          <span>Estatísticas</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <header class="header">
+        <h1 class="title">Novo Procedimento</h1>
+        <div class="row-actions">
+          <button class="btn btn--outline" type="button" id="btn-rascunho">Salvar rascunho</button>
+          <button class="btn" type="button" id="btn-cadastrar">Cadastrar procedimento</button>
+        </div>
+      </header>
+
+      <!-- DADOS BÁSICOS -->
+      <section class="card" aria-labelledby="dados-basicos-title">
+        <div class="card__content">
+          <h2 id="dados-basicos-title" class="section-title">Dados básicos</h2>
+
+          <div class="form-grid">
+            <div class="field">
+              <label class="label" for="numero">Número <span class="req">*</span></label>
+              <input id="numero" name="numero" type="text" placeholder="Ex.: 003.9.1234567/2025" autocomplete="off" required />
+              <div class="hint">Número do procedimento.</div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="classeInput">Classe <span class="req">*</span></label>
+              <!-- Combobox (autocomplete) com datalist -->
+              <input id="classeInput" class="combobox" list="classes-list" name="classe" placeholder="Selecione ou digite para filtrar..." autocomplete="off" />
+              <datalist id="classes-list">
+                <option value="Notícia de Fato"></option>
+                <option value="Reclamação"></option>
+                <option value="Sindicância"></option>
+                <option value="Procedimento Preparatório"></option>
+                <option value="Procedimento Investigatório"></option>
+                <option value="Procedimento Administrativo Disciplinar"></option>
+              </datalist>
+              <div class="hint">Select com autocomplete (datalist). <em>Obs.: pode ser filtrado por ramo do MP no backend.</em></div>
+            </div>
+
+            <div class="field">
+              <span class="label">Sigilo</span>
+              <label class="toggle">
+                <input id="sigilo" type="checkbox" />
+                <span class="switch"><span class="knob"></span></span>
+                <span>Procedimento sob sigilo</span>
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="label" for="dataAutuacao">Data da Autuação <span class="req">*</span></label>
+              <input id="dataAutuacao" name="dataAutuacao" type="date" required />
+              <div class="hint">Marca o início da contagem de prazos.</div>
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+              <label class="label" for="docInicial">Representação / documento inicial</label>
+              <input id="docInicial" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
+              <div class="hint" id="docNomeHint">Anexe o documento com a descrição detalhada do objeto do procedimento.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENVOLVIDOS -->
+      <section class="card" aria-labelledby="envolvidos-title">
+        <div class="card__head">
+          <h2 id="envolvidos-title" class="section-title">Envolvidos</h2>
+          <div class="row-actions">
+            <button class="btn btn--outline" type="button" id="btn-buscar-envolvido">Buscar por CPF/Matrícula</button>
+          </div>
+        </div>
+
+        <div class="card__content">
+          <div class="table-wrap" aria-live="polite">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>Matrícula</th>
+                  <th style="width:120px">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="envolvidos-body">
+                <!-- linhas inseridas via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="hint">Regra: todo procedimento deve ter pelo menos um envolvido vinculado.</div>
+        </div>
+      </section>
+
+      <!-- FATOS -->
+      <section class="card" aria-labelledby="fatos-title">
+        <div class="card__head">
+          <h2 id="fatos-title" class="section-title">Fatos</h2>
+          <div class="row-actions">
+            <button class="btn btn--outline" type="button" id="btn-add-fato">Adicionar Fato</button>
+          </div>
+        </div>
+
+        <div class="card__content">
+          <div class="table-wrap" aria-live="polite">
+            <table>
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Capitulação</th>
+                  <th>Data do fato</th>
+                  <th>Prescrição</th>
+                  <th>Envolvidos (vinculados ao fato)</th>
+                  <th style="width:120px">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="fatos-body">
+                <!-- linhas via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="hint">Regra: todo procedimento deve ter pelo menos um fato cadastrado.</div>
+        </div>
+      </section>
+
+      <!-- AÇÕES FINAIS -->
+      <div class="right">
+        <button class="btn btn--outline" type="button" id="btn-cancelar">Cancelar</button>
+        <button class="btn" type="button" id="btn-cadastrar-bottom">Cadastrar procedimento</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: Buscar Envolvido -->
+  <div class="modal" id="modal-busca">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-busca-title">
+      <div class="dialog__head">
+        <div class="dialog__title" id="dlg-busca-title">Buscar envolvido (CPF ou Matrícula)</div>
+        <button class="btn btn--muted" type="button" data-close-modal="modal-busca">Fechar</button>
+      </div>
+      <div class="dialog__body">
+        <div class="form-grid-3">
+          <div class="field">
+            <label class="label" for="buscaNome">Nome</label>
+            <input id="buscaNome" type="text" placeholder="Ex.: Maria Souza" />
+          </div>
+          <div class="field">
+            <label class="label" for="buscaCPF">CPF</label>
+            <input id="buscaCPF" type="text" placeholder="Somente números" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label class="label" for="buscaMatricula">Matrícula</label>
+            <input id="buscaMatricula" type="text" placeholder="Ex.: 12345" />
+          </div>
+        </div>
+
+        <div class="right">
+          <button class="btn btn--outline" id="btn-limpar-filtros" type="button">Limpar</button>
+          <button class="btn" id="btn-executar-busca" type="button">Buscar</button>
+        </div>
+
+        <div class="table-wrap" style="max-height:300px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;"></th>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Matrícula</th>
+              </tr>
+            </thead>
+            <tbody id="busca-resultados">
+              <!-- resultados -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="right">
+          <button class="btn" id="btn-vincular-selecionados" type="button">Vincular selecionados</button>
+        </div>
+
+        <div class="hint">Integração real deve consultar a base de membros (SCNMP). Aqui há um mock para navegação.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Adicionar/Editar Fato -->
+  <div class="modal" id="modal-fato">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-fato-title">
+      <div class="dialog__head">
+        <div class="dialog__title" id="dlg-fato-title">Cadastrar Fato</div>
+        <button class="btn btn--muted" type="button" data-close-modal="modal-fato">Fechar</button>
+      </div>
+      <div class="dialog__body">
+        <div class="form-grid">
+          <div class="field" style="grid-column: 1 / -1;">
+            <label class="label" for="fato-desc">Descrição do fato <span class="req">*</span></label>
+            <input id="fato-desc" type="text" maxlength="60" placeholder="Máx. 60 caracteres" />
+            <div class="hint"><span id="fato-desc-count">0</span>/60</div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="fato-cap">Capitulação jurídica</label>
+            <select id="fato-cap">
+              <option value="">Selecione</option>
+              <option>Infração funcional – Art. 11</option>
+              <option>Infração funcional – Art. 9º</option>
+              <option>Descumprimento de dever funcional</option>
+              <option>Conflito de interesses</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="label" for="fato-data">Data do fato</label>
+            <input id="fato-data" type="date" />
+          </div>
+
+          <div class="field">
+            <label class="label" for="fato-presc">Data da prescrição</label>
+            <input id="fato-presc" type="date" />
+          </div>
+
+          <div class="field" style="grid-column: 1 / -1;">
+            <span class="label">Vincular envolvidos deste procedimento a este fato</span>
+            <div id="checklist-envolvidos" class="row-actions" style="flex-wrap:wrap">
+              <!-- checkboxes via JS -->
+            </div>
+            <div class="hint">Opcional: selecione os envolvidos relacionados a este fato.</div>
+          </div>
+        </div>
+
+        <div class="right">
+          <button class="btn btn--outline" type="button" id="btn-cancelar-fato">Cancelar</button>
+          <button class="btn" type="button" id="btn-salvar-fato">Salvar fato</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Estado ----------
+    const state = {
+      envolvidos: [],
+      fatos: [],
+      editFatoIndex: null, // null = criando; number = editando
+    };
+
+    // ---------- Util ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const openModal = id => { document.body.style.overflow='hidden'; $('#'+id).classList.add('open'); };
+    const closeModal = id => { $('#'+id).classList.remove('open'); document.body.style.overflow='auto'; };
+
+    function maskCPF(v){
+      const s = (v||'').replace(/\\D/g,'').slice(0,11);
+      return s.replace(/(\\d{3})(\\d)/, '$1.$2')
+              .replace(/(\\d{3})(\\d)/, '$1.$2')
+              .replace(/(\\d{3})(\\d{1,2})$/, '$1-$2');
+    }
+
+    function renderEnvolvidos(){
+      const tbody = $('#envolvidos-body');
+      tbody.innerHTML = '';
+      if(state.envolvidos.length === 0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.style.color = 'var(--muted-2)';
+        td.textContent = 'Nenhum envolvido vinculado.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      state.envolvidos.forEach((e, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${e.nome}</td>
+          <td>${maskCPF(e.cpf)}</td>
+          <td>${e.matricula||'-'}</td>
+          <td>
+            <button class="btn btn--outline" data-rm-env="${idx}" type="button">Remover</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+
+      // remover
+      $$('[data-rm-env]').forEach(btn=>{
+        btn.addEventListener('click', (ev)=>{
+          const i = Number(ev.currentTarget.getAttribute('data-rm-env'));
+          const removed = state.envolvidos.splice(i,1)[0];
+          // também remove vínculos desse envolvido em todos os fatos
+          state.fatos.forEach(f=>{
+            f.envolvidos = (f.envolvidos||[]).filter(cpf => cpf !== removed.cpf);
+          });
+          renderEnvolvidos();
+          renderFatos();
+        });
+      });
+    }
+
+    function renderFatos(){
+      const tbody = $('#fatos-body');
+      tbody.innerHTML = '';
+      if(state.fatos.length === 0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.style.color = 'var(--muted-2)';
+        td.textContent = 'Nenhum fato cadastrado.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      state.fatos.forEach((f, idx)=>{
+        const nomes = (f.envolvidos||[])
+          .map(cpf => state.envolvidos.find(e=>e.cpf===cpf))
+          .filter(Boolean)
+          .map(e=>e.nome);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${f.descricao}</td>
+          <td>${f.capitulacao || '-'}</td>
+          <td>${f.dataFato || '-'}</td>
+          <td>${f.dataPresc || '-'}</td>
+          <td>${nomes.length ? nomes.map(n=>'<span class="pill">'+n+'</span>').join(' ') : '-'}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn btn--outline" data-editar-fato="${idx}" type="button">Editar</button>
+              <button class="btn btn--outline" data-remover-fato="${idx}" type="button">Remover</button>
+            </div>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+
+      $$('[data-remover-fato]').forEach(btn=>{
+        btn.addEventListener('click', (ev)=>{
+          const i = Number(ev.currentTarget.getAttribute('data-remover-fato'));
+          state.fatos.splice(i,1);
+          renderFatos();
+        });
+      });
+
+      $$('[data-editar-fato]').forEach(btn=>{
+        btn.addEventListener('click', (ev)=>{
+          const i = Number(ev.currentTarget.getAttribute('data-editar-fato'));
+          state.editFatoIndex = i;
+          const f = state.fatos[i];
+          $('#dlg-fato-title').textContent = 'Editar Fato';
+          $('#fato-desc').value = f.descricao || '';
+          $('#fato-desc-count').textContent = String(f.descricao?.length||0);
+          $('#fato-cap').value = f.capitulacao || '';
+          $('#fato-data').value = f.dataFato || '';
+          $('#fato-presc').value = f.dataPresc || '';
+          // checklist de envolvidos
+          montarChecklistEnvolvidos(f.envolvidos||[]);
+          openModal('modal-fato');
+        });
+      });
+    }
+
+    function montarChecklistEnvolvidos(preSelecionados=[]){
+      const wrap = $('#checklist-envolvidos');
+      wrap.innerHTML = '';
+      state.envolvidos.forEach(e=>{
+        const id = 'chk-'+e.cpf;
+        const lbl = document.createElement('label');
+        lbl.className = 'pill';
+        lbl.htmlFor = id;
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = id;
+        input.value = e.cpf;
+        input.checked = preSelecionados.includes(e.cpf);
+        input.style.marginRight = '6px';
+        lbl.prepend(input);
+        lbl.appendChild(document.createTextNode(e.nome));
+        wrap.appendChild(lbl);
+      });
+      if(state.envolvidos.length===0){
+        wrap.innerHTML = '<span class="hint">Nenhum envolvido no procedimento ainda.</span>';
+      }
+    }
+
+    // ---------- Mock de base de membros (substituir por integração real) ----------
+    const MOCK_MEMBROS = [
+      { nome:'Maria das Dores', cpf:'12345678901', matricula:'A1023' },
+      { nome:'João Pereira', cpf:'98765432100', matricula:'B7781' },
+      { nome:'Fernanda Lima', cpf:'11122233344', matricula:'C5555' },
+      { nome:'Carlos Alberto', cpf:'55566677788', matricula:'D9090' },
+    ];
+
+    function buscarMembros({nome, cpf, matricula}){
+      nome = (nome||'').trim().toLowerCase();
+      cpf = (cpf||'').replace(/\\D/g,'');
+      matricula = (matricula||'').trim().toLowerCase();
+      return MOCK_MEMBROS.filter(m=>{
+        const okNome = nome ? m.nome.toLowerCase().includes(nome) : true;
+        const okCPF = cpf ? m.cpf.includes(cpf) : true;
+        const okMat = matricula ? m.matricula.toLowerCase().includes(matricula) : true;
+        return okNome && okCPF && okMat;
+      });
+    }
+
+    function renderResultadosBusca(lista){
+      const tbody = $('#busca-resultados');
+      tbody.innerHTML = '';
+      if(lista.length===0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4; td.style.color='var(--muted-2)';
+        td.textContent = 'Nenhum resultado para os filtros informados.';
+        tr.appendChild(td); tbody.appendChild(tr);
+        return;
+      }
+      lista.forEach((m, idx)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="checkbox" data-sel="${idx}" /></td>
+          <td>${m.nome}</td>
+          <td>${maskCPF(m.cpf)}</td>
+          <td>${m.matricula}</td>`;
+        tbody.appendChild(tr);
+      });
+      // guardar lista atual no tbody para recuperar por índice
+      tbody.dataset.serialized = JSON.stringify(lista);
+    }
+
+    function vincularSelecionados(){
+      const tbody = $('#busca-resultados');
+      const lista = JSON.parse(tbody.dataset.serialized || '[]');
+      const checks = $$('input[type="checkbox"][data-sel]', tbody);
+      const selecionados = checks
+        .map((c,i)=> c.checked ? lista[i] : null)
+        .filter(Boolean);
+      if(selecionados.length===0){
+        alert('Selecione pelo menos uma pessoa para vincular.');
+        return;
+      }
+      // evitar duplicados por CPF
+      const existentes = new Set(state.envolvidos.map(e=>e.cpf));
+      selecionados.forEach(s=>{
+        if(!existentes.has(s.cpf)) state.envolvidos.push(s);
+      });
+      renderEnvolvidos();
+      closeModal('modal-busca');
+    }
+
+    // ---------- Eventos ----------
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // destacar menu atual já está via .active
+
+      // upload: exibir nome
+      $('#docInicial').addEventListener('change', (e)=>{
+        const f = e.target.files?.[0];
+        $('#docNomeHint').textContent = f ? ('Selecionado: ' + f.name) : 'Anexe o documento que contenha o objeto do procedimento.';
+      });
+
+      // modal busca
+      $('#btn-buscar-envolvido').addEventListener('click', ()=>{
+        $('#buscaNome').value = '';
+        $('#buscaCPF').value = '';
+        $('#buscaMatricula').value = '';
+        renderResultadosBusca(MOCK_MEMBROS); // default: lista inteira
+        openModal('modal-busca');
+      });
+
+      $('#btn-executar-busca').addEventListener('click', ()=>{
+        renderResultadosBusca(buscarMembros({
+          nome: $('#buscaNome').value,
+          cpf: $('#buscaCPF').value,
+          matricula: $('#buscaMatricula').value
+        }));
+      });
+
+      $('#btn-limpar-filtros').addEventListener('click', ()=>{
+        $('#buscaNome').value = '';
+        $('#buscaCPF').value = '';
+        $('#buscaMatricula').value = '';
+        renderResultadosBusca(MOCK_MEMBROS);
+      });
+
+      $('#btn-vincular-selecionados').addEventListener('click', vincularSelecionados);
+
+      $$('[data-close-modal]').forEach(btn=>{
+        btn.addEventListener('click', (ev)=> closeModal(ev.currentTarget.getAttribute('data-close-modal')));
+      });
+
+      // modal fato
+      $('#btn-add-fato').addEventListener('click', ()=>{
+        state.editFatoIndex = null;
+        $('#dlg-fato-title').textContent = 'Cadastrar Fato';
+        $('#fato-desc').value=''; $('#fato-desc-count').textContent='0';
+        $('#fato-cap').value=''; $('#fato-data').value=''; $('#fato-presc').value='';
+        montarChecklistEnvolvidos([]);
+        openModal('modal-fato');
+      });
+
+      $('#fato-desc').addEventListener('input', (e)=>{
+        $('#fato-desc-count').textContent = String(e.target.value.length);
+      });
+
+      $('#btn-cancelar-fato').addEventListener('click', ()=> closeModal('modal-fato'));
+
+      $('#btn-salvar-fato').addEventListener('click', ()=>{
+        const descricao = $('#fato-desc').value.trim();
+        if(!descricao){
+          alert('Informe a descrição do fato (obrigatória).');
+          return;
+        }
+        const capitulacao = $('#fato-cap').value;
+        const dataFato = $('#fato-data').value;
+        const dataPresc = $('#fato-presc').value;
+        const envolvidos = $$('#checklist-envolvidos input[type="checkbox"]:checked').map(i=>i.value);
+
+        const payload = { descricao, capitulacao, dataFato, dataPresc, envolvidos };
+
+        if(state.editFatoIndex===null){
+          state.fatos.push(payload);
+        } else {
+          state.fatos[state.editFatoIndex] = payload;
+        }
+        renderFatos();
+        closeModal('modal-fato');
+      });
+
+      // cadastrar/cancelar/rascunho
+      function validarFormulario(){
+        const numero = $('#numero').value.trim();
+        const classe = $('#classeInput').value.trim();
+        const dataAutuacao = $('#dataAutuacao').value;
+        if(!numero){ alert('Preencha o número do procedimento.'); return false; }
+        if(!classe){ alert('Selecione a classe do procedimento.'); return false; }
+        if(!dataAutuacao){ alert('Informe a data da autuação.'); return false; }
+        if(state.envolvidos.length===0){ alert('Vincule pelo menos um envolvido ao procedimento.'); return false; }
+        if(state.fatos.length===0){ alert('Cadastre pelo menos um fato.'); return false; }
+        return true;
+      }
+
+      function coletarPayload(){
+        return {
+          numero: $('#numero').value.trim(),
+          classe: $('#classeInput').value.trim(),
+          sigilo: $('#sigilo').checked,
+          dataAutuacao: $('#dataAutuacao').value,
+          docInicial: $('#docInicial').files?.[0]?.name || null,
+          envolvidos: state.envolvidos,
+          fatos: state.fatos
+        };
+      }
+
+      function enviar(status){
+        if(!validarFormulario()) return;
+        const body = coletarPayload();
+        body.status = status; // 'rascunho' | 'final'
+        console.log('Payload pronto para envio:', body);
+        alert('✔ Procedimento ' + (status==='rascunho' ? 'salvo como rascunho' : 'cadastrado') + '. (ver console)');
+        // Aqui você faria um fetch POST para sua API.
+      }
+
+      $('#btn-cadastrar').addEventListener('click', ()=> enviar('final'));
+      $('#btn-cadastrar-bottom').addEventListener('click', ()=> enviar('final'));
+      $('#btn-rascunho').addEventListener('click', ()=> enviar('rascunho'));
+      $('#btn-cancelar').addEventListener('click', ()=>{
+        if(confirm('Cancelar e descartar alterações?')){
+          // Redirecionar para dashboard/landing
+          window.location.href = './index.html';
+        }
+      });
+
+      // inicial
+      renderEnvolvidos();
+      renderFatos();
+    });
+  </script>
+</body>
+</html>

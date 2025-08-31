@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIND • Estatísticas</title>
+  <style>
+    :root{
+      --bg:#f9fafb; --text:#1f2937; --muted:#6b7280; --muted-2:#9ca3af; --white:#fff;
+      --red-900:#7f1d1d; --red-800:#991b1b; --red-700:#b91c1c; --red-50:#fef2f2;
+      --border:#e5e7eb; --card:#ffffff; --shadow: 0 10px 20px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
+      --green:#16a34a; --amber:#d97706; --blue:#1d4ed8; --violet:#6d28d9; --rose:#be123c; --sky:#0369a1;
+      --lime:#65a30d; --orange:#ea580c; --slate:#334155;
+    }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--text) }
+    a{ color:var(--red-700); text-decoration:none } a:hover{ text-decoration:underline }
+
+    /* Layout */
+    .layout{ display:grid; grid-template-columns:260px 1fr; min-height:100dvh }
+
+    /* Sidebar */
+    aside{ background:var(--red-900); color:#fff; padding:24px 16px }
+    .brand{ display:flex; align-items:center; gap:12px; margin-bottom:18px }
+    .brand span{ font-weight:800; letter-spacing:.5px }
+    nav{ display:flex; flex-direction:column; gap:8px }
+    .nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; color:#fff }
+    .nav-item:hover{ background:rgba(255,255,255,.08) }
+    .nav-item--active{ background:rgba(255,255,255,.12) }
+    .nav-item svg{ width:16px; height:16px }
+
+    /* Main */
+    main{ padding:24px }
+    .header{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:16px }
+    .title{ margin:0; font-size:22px; font-weight:800; color:#111827 }
+    .muted{ color:var(--muted) }
+
+    /* Buttons */
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:600; border:1px solid transparent; padding:10px 18px; border-radius:14px; cursor:pointer; transition: background .2s, border-color .2s, color .2s, transform .02s; background:var(--red-700); color:#fff; box-shadow:var(--shadow) }
+    .btn:hover{ background:var(--red-800) } .btn:active{ transform:translateY(1px) }
+    .btn--outline{ background:#fff; color:var(--red-700); border-color:var(--red-700); box-shadow:none }
+    .btn--outline:hover{ background:var(--red-50) }
+    .btn--muted{ background:#f3f4f6; color:#374151; border-color:#e5e7eb; box-shadow:none }
+    .btn--sm{ padding:8px 12px; border-radius:10px; font-size:13px }
+
+    /* Cards */
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); margin-bottom:16px }
+    .card__head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px }
+    .card__body{ padding:16px }
+    .section-title{ margin:0; font-weight:700; font-size:18px; color:#374151; display:flex; align-items:center; gap:8px }
+
+    /* Filters */
+    .filters{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+    select{ padding:10px 12px; border:1px solid var(--border); background:#fff; border-radius:12px; font-size:14px; outline:none }
+
+    /* Chart area */
+    .chart-grid{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:16px }
+    @media (max-width: 980px){ .chart-grid{ grid-template-columns: 1fr } }
+
+    .chart-card{ display:grid; grid-template-columns: 280px 1fr; gap:12px; align-items:center }
+    @media (max-width: 720px){ .chart-card{ grid-template-columns: 1fr } }
+    .chart-wrap{ display:flex; align-items:center; justify-content:center; padding:12px }
+    .legend{ display:flex; flex-direction:column; gap:8px }
+    .legend-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; border:1px dashed var(--border); border-radius:12px; padding:8px 10px }
+    .legend-left{ display:flex; align-items:center; gap:8px }
+    .dot{ width:12px; height:12px; border-radius:3px; display:inline-block }
+    .legend-label{ font-size:14px; color:#111827; font-weight:600 }
+    .legend-values{ font-variant-numeric: tabular-nums; color:var(--slate) }
+    .center-total{ font-weight:800; fill:#111827; }
+    .center-sub{ fill:var(--muted); font-size:12px }
+
+    .footnote{ margin-top:8px; font-size:12px; color:var(--muted) }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside>
+      <div class="brand">
+        <img src="/image.png" alt="CNMP" style="width:100px;height:auto" />
+        <span>SIND</span>
+      </div>
+      <nav>
+        <a class="nav-item" href="./index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12L12 4l8 8" />
+            <path d="M4 12v8h16v-8" />
+          </svg>
+          <span>Início</span>
+        </a>
+        <a class="nav-item" href="novo.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Novo Procedimento</span>
+        </a>
+        <a class="nav-item" href="acervo.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="13" rx="2"/>
+            <path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Acervo</span>
+        </a>
+        <a class="nav-item" href="consulta.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>Consulta</span>
+        </a>
+        <a class="nav-item" href="mensagens.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="10" rx="2"/>
+            <polyline points="3 7 12 13 21 7"/>
+          </svg>
+          <span>Mensagens</span>
+        </a>
+        <a class="nav-item nav-item--active" aria-current="page" href="estatistica.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="12" width="4" height="8"/>
+            <rect x="10" y="8" width="4" height="12"/>
+            <rect x="17" y="4" width="4" height="16"/>
+          </svg>
+          <span>Estatísticas</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <header class="header">
+        <h1 class="title">Estatísticas</h1>
+        <div class="filters">
+          <label for="f-ramo" class="muted">Ramo:</label>
+          <select id="f-ramo">
+            <option value="">Todos</option>
+            <option>MPBA</option>
+            <option>MPRO</option>
+            <option>MPTO</option>
+            <option>MPDFT</option>
+            <option>MPMG</option>
+          </select>
+          <button class="btn btn--sm" id="btn-refresh">Atualizar</button>
+        </div>
+      </header>
+
+      <div class="chart-grid">
+        <!-- (1) Pizza Status no Ramo -->
+        <section class="card" aria-labelledby="c1-title">
+          <div class="card__head">
+            <h2 id="c1-title" class="section-title">(1) Proporção por status — no ramo</h2>
+          </div>
+          <div class="card__body chart-card">
+            <div class="chart-wrap"><svg id="chart-1" width="240" height="240" role="img" aria-label="Pizza por status"></svg></div>
+            <div>
+              <div class="legend" id="legend-1"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- (2) Pizza Duração em Andamento -->
+        <section class="card" aria-labelledby="c2-title">
+          <div class="card__head">
+            <h2 id="c2-title" class="section-title">(2) Duração (dias) — somente em andamento</h2>
+          </div>
+          <div class="card__body chart-card">
+            <div class="chart-wrap"><svg id="chart-2" width="240" height="240" role="img" aria-label="Pizza por duração"></svg></div>
+            <div>
+              <div class="legend" id="legend-2"></div>
+              <div class="footnote">Base: procedimentos em andamento. Duração = hoje − data de autuação.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- (3) Pizza Dias sem andamento -->
+        <section class="card" aria-labelledby="c3-title">
+          <div class="card__head">
+            <h2 id="c3-title" class="section-title">(3) Dias sem andamento — somente em andamento</h2>
+          </div>
+          <div class="card__body chart-card">
+            <div class="chart-wrap"><svg id="chart-3" width="240" height="240" role="img" aria-label="Pizza por dias sem andamento"></svg></div>
+            <div>
+              <div class="legend" id="legend-3"></div>
+              <div class="footnote">Procedimentos sem histórico de andamentos foram desconsiderados.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- (4) Pizza Dias para prescrição -->
+        <section class="card" aria-labelledby="c4-title">
+          <div class="card__head">
+            <h2 id="c4-title" class="section-title">(4) Dias para prescrição — em andamento ou sobrestado</h2>
+          </div>
+          <div class="card__body chart-card">
+            <div class="chart-wrap"><svg id="chart-4" width="240" height="240" role="img" aria-label="Pizza por dias para prescrição"></svg></div>
+            <div>
+              <div class="legend" id="legend-4"></div>
+              <div class="footnote">Dias negativos (já prescritos) são considerados 0 para fins de agrupamento.</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // ===== Utils =====
+    const $ = (s, r=document)=> r.querySelector(s);
+    const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
+    const parseISO = (s)=>{ const d = new Date(s); return isNaN(+d) ? null : d };
+    const daysBetween = (a,b)=> Math.round((+b - +a)/86400000);
+    const clamp = (n, min, max)=> Math.min(max, Math.max(min, n));
+
+    // ===== Data access / seed =====
+    function readProcedures(){
+      try{
+        const raw = localStorage.getItem('procedimentos');
+        if(raw){ return JSON.parse(raw); }
+      }catch(e){}
+      // seed mínimo (mesmo da consulta)
+      const seed = [
+        {
+          id:'P-2025-0001', ramo:'MPBA', numero:'2025.000123.000045', classe:'PAD - Processo Administrativo Disciplinar', sigilo:true,
+          dataAutuacao:'2025-07-12', situacao:'em andamento',
+          envolvidos:[ {nome:'Maria Souza', matricula:'A1234', cpf:'123.456.789-00'}, {nome:'João Silva', matricula:'B8790', cpf:'987.654.321-00'} ],
+          fatos:[ {descricao:'Suposta infração', capitulacao:'Lei 8.112/90 - Art. 116', dataFato:'2025-05-10', dataPrescricao:'2027-05-10', envolvidos:['123.456.789-00']} ],
+          andamentos:[ {descricao:'Instauração', data:'2025-07-15'}, {descricao:'Sobreestamento', data:'2025-08-10'} ]
+        },
+        {
+          id:'P-2024-0007', ramo:'MPRO', numero:'2024.000007.000321', classe:'Sindicância', sigilo:false,
+          dataAutuacao:'2024-11-20', situacao:'suspenso',
+          envolvidos:[ {nome:'Ana Pereira', matricula:'C3321', cpf:'111.222.333-44'} ],
+          fatos:[ {descricao:'Descumprimento de prazo', capitulacao:'Lei 8.112/90 - Art. 117', dataFato:'2024-10-02', dataPrescricao:'2026-10-02', envolvidos:['111.222.333-44']} ],
+          andamentos:[ {descricao:'Instauração', data:'2024-11-25'}, {descricao:'Suspensão', data:'2024-12-15'} ]
+        },
+        {
+          id:'P-2023-0042', ramo:'MPTO', numero:'2023.000042.000999', classe:'Representação', sigilo:false,
+          dataAutuacao:'2023-03-05', situacao:'finalizado',
+          envolvidos:[ {nome:'Carlos Lima', matricula:'D7788', cpf:'555.666.777-88'}, {nome:'Paula Braga', matricula:'E1122', cpf:'222.333.444-55'} ],
+          fatos:[ {descricao:'Arquivamento por improcedência', capitulacao:'—', dataFato:'2023-02-10', dataPrescricao:'2025-02-10', envolvidos:['555.666.777-88','222.333.444-55']} ],
+          andamentos:[ {descricao:'Instauração', data:'2023-03-10'}, {descricao:'Arquivamento', data:'2023-04-20'} ]
+        }
+      ];
+      try{ localStorage.setItem('procedimentos', JSON.stringify(seed)); }catch(e){}
+      return seed;
+    }
+
+    function byRamo(list, ramo){ return ramo ? list.filter(p=>p.ramo===ramo) : list.slice(); }
+
+    // ===== Buckets helpers =====
+    function bucketCounts(values, buckets){
+      // buckets: [{label, test(v)}]
+      const out = buckets.map(b=>({label:b.label, value:0}));
+      values.forEach(v=>{
+        const i = buckets.findIndex(b=>b.test(v));
+        if(i>=0) out[i].value++;
+      });
+      return out;
+    }
+
+    function lastAndamentoDate(p){
+      const list = (p.andamentos||[]).map(a=>a.data).filter(Boolean).sort();
+      return list.length? parseISO(list[list.length-1]) : null;
+    }
+
+    function nearestPrescriptionDate(p){
+      const list = (p.fatos||[]).map(f=>f.dataPrescricao).filter(Boolean).sort();
+      return list.length? parseISO(list[0]) : null; // mais próxima
+    }
+
+    // ===== Chart: SVG pie =====
+    function polarToCartesian(cx, cy, r, angleDeg){
+      const rad = (angleDeg-90) * Math.PI/180;
+      return { x: cx + (r*Math.cos(rad)), y: cy + (r*Math.sin(rad)) };
+    }
+    function describeArc(cx, cy, r, startAngle, endAngle){
+      const start = polarToCartesian(cx,cy,r,endAngle);
+      const end   = polarToCartesian(cx,cy,r,startAngle);
+      const large = endAngle - startAngle <= 180 ? 0 : 1;
+      return `M ${start.x} ${start.y} A ${r} ${r} 0 ${large} 0 ${end.x} ${end.y}`;
+    }
+    function renderPie(svgId, legendId, data, centerTitle){
+      const svg = document.getElementById(svgId);
+      const legend = document.getElementById(legendId);
+      svg.innerHTML = ''; legend.innerHTML='';
+
+      const total = data.reduce((s,d)=>s+d.value,0);
+      const w = svg.viewBox.baseVal && svg.viewBox.baseVal.width ? svg.viewBox.baseVal.width : svg.getAttribute('width');
+      const h = svg.viewBox.baseVal && svg.viewBox.baseVal.height ? svg.viewBox.baseVal.height : svg.getAttribute('height');
+      const cx = w/2, cy = h/2, r = Math.min(w,h)/2 - 10;
+
+      // fundo
+      const bg = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      bg.setAttribute('cx',cx); bg.setAttribute('cy',cy); bg.setAttribute('r', r);
+      bg.setAttribute('fill', '#fff'); bg.setAttribute('stroke', '#e5e7eb');
+      svg.appendChild(bg);
+
+      if(total===0){
+        const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+        t.setAttribute('x', cx); t.setAttribute('y', cy);
+        t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle');
+        t.setAttribute('class','center-sub'); t.textContent = 'Sem dados';
+        svg.appendChild(t);
+        return;
+      }
+
+      let angle = 0;
+      data.forEach(d=>{
+        if(d.value<=0) return;
+        const sweep = (d.value/total) * 360;
+        const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+        p.setAttribute('d', describeArc(cx,cy,r, angle, angle+sweep));
+        p.setAttribute('stroke', d.color);
+        p.setAttribute('stroke-width', r);
+        p.setAttribute('fill','none');
+        p.setAttribute('stroke-linecap','butt');
+        svg.appendChild(p);
+        angle += sweep;
+      });
+
+      // centro
+      const t1 = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t1.setAttribute('x', cx); t1.setAttribute('y', cy-4);
+      t1.setAttribute('text-anchor','middle'); t1.setAttribute('class','center-total');
+      t1.textContent = total;
+      svg.appendChild(t1);
+      const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t2.setAttribute('x', cx); t2.setAttribute('y', cy+14);
+      t2.setAttribute('text-anchor','middle'); t2.setAttribute('class','center-sub');
+      t2.textContent = centerTitle || 'Total';
+      svg.appendChild(t2);
+
+      // legenda
+      data.forEach(d=>{
+        const row = document.createElement('div'); row.className='legend-row';
+        const left = document.createElement('div'); left.className='legend-left';
+        const dot = document.createElement('span'); dot.className='dot'; dot.style.background = d.color;
+        const label = document.createElement('span'); label.className='legend-label'; label.textContent = d.label;
+        left.appendChild(dot); left.appendChild(label);
+        const right = document.createElement('span'); right.className='legend-values';
+        const pct = total? Math.round((d.value/total)*100) : 0;
+        right.textContent = `${d.value} • ${pct}%`;
+        row.appendChild(left); row.appendChild(right);
+        legend.appendChild(row);
+      });
+    }
+
+    // ===== Build datasets =====
+    function buildChart1(list){
+      // status no ramo
+      const counts = { 'finalizado':0, 'em andamento':0, 'suspenso':0 };
+      list.forEach(p=>{ if(counts[p.situacao]!==undefined) counts[p.situacao]++; });
+      return [
+        {label:'Finalizado', value:counts['finalizado'], color:'#16a34a'},
+        {label:'Em andamento', value:counts['em andamento'], color:'#1d4ed8'},
+        {label:'Suspenso', value:counts['suspenso'], color:'#d97706'}
+      ];
+    }
+
+    function buildChart2(list){
+      // MOCK: distribui dados fictícios pelas faixas do gráfico
+      // Faixas: [até 180, 181–365, 366–730, 731–1095, >1095 dias]
+      const buckets = [
+        {label:'Até 180 dias', test:v=> v<=180 },
+        {label:'181–365 dias', test:v=> v>180 && v<=365 },
+        {label:'366–730 dias', test:v=> v>365 && v<=730 },
+        {label:'731–1095 dias', test:v=> v>730 && v<=1095 },
+        {label:'> 1095 dias', test:v=> v>1095 }
+      ];
+      // Dados mockados para simular processos distribuídos nas faixas
+      const mockValues = [
+        ...Array(7).fill(90),    // 7 processos até 180 dias
+        ...Array(5).fill(250),   // 5 processos entre 181–365 dias
+        ...Array(4).fill(500),   // 4 processos entre 366–730 dias
+        ...Array(3).fill(800),   // 3 processos entre 731–1095 dias
+        ...Array(2).fill(1200)   // 2 processos acima de 1095 dias
+      ];
+      // Se quiser misturar com dados reais, use: const values = [...mockValues, ...realValues];
+      const values = mockValues;
+      return bucketCounts(values, buckets).map((b,i)=> ({
+        ...b,
+        color: ['#1d4ed8','#22c55e','#eab308','#f97316','#ef4444'][i]
+      }));
+    }
+
+    function buildChart3(list){
+      // MOCK: distribui dados fictícios pelas faixas do gráfico de dias sem andamento
+      // Faixas: [até 30, 31–60, 61–90, >90 dias]
+      const buckets = [
+        {label:'Até 30 dias', test:v=> v<=30 },
+        {label:'31–60 dias', test:v=> v>30 && v<=60 },
+        {label:'61–90 dias', test:v=> v>60 && v<=90 },
+        {label:'> 90 dias',  test:v=> v>90 }
+      ];
+      // Dados mockados para simular processos distribuídos nas faixas
+      const mockValues = [
+        ...Array(6).fill(15),   // 6 processos até 30 dias
+        ...Array(5).fill(45),   // 5 processos entre 31–60 dias
+        ...Array(4).fill(75),   // 4 processos entre 61–90 dias
+        ...Array(3).fill(120)   // 3 processos acima de 90 dias
+      ];
+      const values = mockValues;
+      return bucketCounts(values, buckets).map((b,i)=> ({
+        ...b,
+        color: ['#10b981','#f59e0b','#f97316','#ef4444'][i]
+      }));
+    }
+
+    function buildChart4(list){
+      // MOCK: distribui dados fictícios pelas faixas do gráfico de dias para prescrição
+      // Faixas: [até 30, 31–60, 61–90, >90 dias]
+      const buckets = [
+        {label:'Até 30 dias', test:v=> v<=30 },
+        {label:'31–60 dias', test:v=> v>30 && v<=60 },
+        {label:'61–90 dias', test:v=> v>60 && v<=90 },
+        {label:'> 90 dias',  test:v=> v>90 }
+      ];
+      // Dados mockados para simular processos distribuídos nas faixas
+      const mockValues = [
+        ...Array(5).fill(10),    // 5 processos até 30 dias
+        ...Array(4).fill(45),    // 4 processos entre 31–60 dias
+        ...Array(3).fill(75),    // 3 processos entre 61–90 dias
+        ...Array(6).fill(120)    // 6 processos acima de 90 dias
+      ];
+      const values = mockValues;
+      return bucketCounts(values, buckets).map((b,i)=> ({
+        ...b,
+        color: ['#22c55e','#84cc16','#f59e0b','#ef4444'][i]
+      }));
+    }
+
+    function renderAll(){
+      const ramo = $('#f-ramo').value;
+      const all = readProcedures();
+      const list = byRamo(all, ramo);
+
+      const d1 = buildChart1(list);
+      renderPie('chart-1', 'legend-1', d1, 'Procedimentos');
+
+      const d2 = buildChart2(list);
+      renderPie('chart-2', 'legend-2', d2, 'Em andamento');
+
+      const d3 = buildChart3(list);
+      renderPie('chart-3', 'legend-3', d3, 'Em andamento');
+
+      const d4 = buildChart4(list);
+      renderPie('chart-4', 'legend-4', d4, 'Em andamento');
+    }
+
+    // boot
+    window.addEventListener('DOMContentLoaded', ()=>{
+      $('#btn-refresh').addEventListener('click', renderAll);
+      $('#f-ramo').addEventListener('change', renderAll);
+      renderAll();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIND • Mensagens</title>
+  <style>
+    :root{
+      --bg:#f9fafb; --text:#1f2937; --muted:#6b7280; --muted-2:#9ca3af; --white:#fff;
+      --red-900:#7f1d1d; --red-800:#991b1b; --red-700:#b91c1c; --red-50:#fef2f2;
+      --border:#e5e7eb; --card:#ffffff; --shadow: 0 10px 20px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
+      --blue:#1d4ed8; --amber:#d97706; --green:#16a34a;
+    }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--text) }
+    a{ color:var(--red-700); text-decoration:none } a:hover{ text-decoration:underline }
+
+    /* Layout */
+    .layout{ display:grid; grid-template-columns:260px 1fr; min-height:100dvh }
+
+    /* Sidebar */
+    aside{ background:var(--red-900); color:#fff; padding:24px 16px }
+    .brand{ display:flex; align-items:center; gap:12px; margin-bottom:18px }
+    .brand span{ font-weight:800; letter-spacing:.5px }
+    nav{ display:flex; flex-direction:column; gap:8px }
+    .nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; color:#fff }
+    .nav-item:hover{ background:rgba(255,255,255,.08) }
+    .nav-item--active{ background:rgba(255,255,255,.12) }
+    .nav-item svg{ width:16px; height:16px }
+
+    /* Main */
+    main{ padding:24px }
+    .header{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:16px }
+    .title{ margin:0; font-size:22px; font-weight:800; color:#111827 }
+
+    /* Buttons */
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:600; border:1px solid transparent; padding:10px 18px; border-radius:14px; cursor:pointer; transition: background .2s, border-color .2s, color .2s, transform .02s; background:var(--red-700); color:#fff; box-shadow:var(--shadow) }
+    .btn:hover{ background:var(--red-800) } .btn:active{ transform:translateY(1px) }
+    .btn--outline{ background:#fff; color:var(--red-700); border-color:var(--red-700); box-shadow:none }
+    .btn--outline:hover{ background:var(--red-50) }
+    .btn--muted{ background:#f3f4f6; color:#374151; border-color:#e5e7eb; box-shadow:none }
+    .btn--sm{ padding:8px 12px; border-radius:10px; font-size:13px }
+
+    /* Card */
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); margin-bottom:16px }
+    .card__head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px }
+    .card__body{ padding:20px }
+    .section-title{ margin:0; font-weight:700; font-size:18px; color:#374151; display:flex; align-items:center; gap:8px }
+
+    /* Empty state / roadmap */
+    .empty{
+      display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:center;
+    }
+    @media (max-width: 980px){ .empty{ grid-template-columns:1fr } }
+
+    .illustration{ display:flex; align-items:center; justify-content:center; padding:12px }
+    .msg{ display:flex; flex-direction:column; gap:12px }
+    .lead{ font-size:18px; font-weight:800; color:#111827 }
+    .muted{ color:var(--muted) }
+    .roadmap{ display:flex; flex-direction:column; gap:12px }
+    .step{ display:flex; gap:12px; align-items:flex-start; border:1px dashed var(--border); padding:12px; border-radius:12px; background:#fff }
+    .step .dot{ width:10px; height:10px; border-radius:50%; background:var(--red-700); margin-top:6px }
+    .step h4{ margin:0; font-size:14px; color:#111827 }
+    .step p{ margin:2px 0 0; font-size:13px; color:var(--muted) }
+
+    .ribbon{ display:inline-block; background:var(--red-50); color:var(--red-700); border:1px solid var(--red-700); padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside>
+      <div class="brand">
+        <img src="/image.png" alt="CNMP" style="width:100px;height:auto" />
+        <span>SIND</span>
+      </div>
+      <nav>
+        <a class="nav-item" href="./index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12L12 4l8 8"/>
+            <path d="M4 12v8h16v-8"/>
+          </svg>
+          <span>Início</span>
+        </a>
+        <a class="nav-item" href="novo.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Novo Procedimento</span>
+        </a>
+        <a class="nav-item" href="acervo.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="13" rx="2"/>
+            <path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Acervo</span>
+        </a>
+        <a class="nav-item" href="consulta.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>Consulta</span>
+        </a>
+        <a class="nav-item nav-item--active" aria-current="page" href="mensagens.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="7" width="18" height="10" rx="2"/>
+            <polyline points="3 7 12 13 21 7"/>
+          </svg>
+          <span>Mensagens</span>
+        </a>
+        <a class="nav-item" href="estatistica.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="12" width="4" height="8"/>
+            <rect x="10" y="8" width="4" height="12"/>
+            <rect x="17" y="4" width="4" height="16"/>
+          </svg>
+          <span>Estatísticas</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <header class="header">
+        <h1 class="title">Mensagens</h1>
+        <span class="ribbon" aria-label="estado de desenvolvimento">Em desenvolvimento</span>
+      </header>
+
+      <section class="card" aria-labelledby="mensagens-title">
+        <div class="card__head">
+          <h2 id="mensagens-title" class="section-title">Módulo em evolução contínua</h2>
+        </div>
+        <div class="card__body">
+          <div class="empty">
+            <div class="illustration" aria-hidden="true">
+              <!-- Ilustração simples em SVG (sem dependências) -->
+              <svg width="280" height="200" viewBox="0 0 280 200" role="img" aria-label="Ilustração de sistema em evolução">
+                <defs>
+                  <linearGradient id="g" x1="0" x2="1">
+                    <stop offset="0" stop-color="#fef2f2"/>
+                    <stop offset="1" stop-color="#ffffff"/>
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="280" height="200" fill="url(#g)" stroke="#e5e7eb" />
+                <g transform="translate(30,30)" stroke="#b91c1c" fill="none" stroke-width="2">
+                  <rect x="0" y="0" width="160" height="100" rx="10" fill="#fff" stroke="#e5e7eb" />
+                  <path d="M15 25 H145" stroke="#e5e7eb" />
+                  <rect x="15" y="40" width="60" height="12" rx="6" fill="#fef2f2" />
+                  <rect x="80" y="40" width="60" height="12" rx="6" fill="#fef2f2" />
+                  <rect x="15" y="60" width="125" height="12" rx="6" fill="#fef2f2" />
+                </g>
+                <g transform="translate(210,120)">
+                  <circle cx="0" cy="0" r="20" fill="#b91c1c" />
+                  <rect x="-30" y="20" width="60" height="8" rx="4" fill="#b91c1c" />
+                </g>
+                <text x="30" y="170" fill="#6b7280" font-family="system-ui,Arial" font-size="12">Uma nova experiência de comunicação segura está chegando…</text>
+              </svg>
+            </div>
+
+            <div class="msg">
+              <div class="lead">Esta funcionalidade está sendo preparada para você.</div>
+              <p class="muted">O módulo <strong>Mensagens</strong> integrará comunicações entre o CNMP e os ramos do Ministério Público, com segurança, rastreabilidade e organização. Estamos trabalhando para disponibilizar, em breve, uma experiência clara, acessível e eficiente, alinhada aos padrões de um órgão público nacional.</p>
+
+              <div class="roadmap" aria-label="itens previstos">
+                <div class="step">
+                  <span class="dot" aria-hidden="true"></span>
+                  <div>
+                    <h4>Caixa de entrada por perfil</h4>
+                    <p>Mensagens segmentadas por unidade do MP, com filtros, busca e indicações de prioridade.</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <span class="dot" aria-hidden="true"></span>
+                  <div>
+                    <h4>Confirmação de leitura e trilha de auditoria</h4>
+                    <p>Transparência na comunicação, com registro de eventos e histórico por procedimento.</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <span class="dot" aria-hidden="true"></span>
+                  <div>
+                    <h4>Integrações institucionais</h4>
+                    <p>Integração com e-mail institucional e notificações do SIND, respeitando requisitos de segurança.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <a class="btn btn--outline" href="./index.html" id="btn-voltar">Voltar</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>
