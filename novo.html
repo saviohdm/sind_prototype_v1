@@ -397,6 +397,13 @@
           </div>
         </div>
 
+        <div class="field" style="margin-top:8px">
+          <label class="label" style="display:flex; align-items:center; gap:8px; font-weight:600">
+            <input id="chk-nao-identificado" type="checkbox" /> Não identificado
+          </label>
+          <div class="hint">Use esta opção quando o envolvido não puder ser identificado. Conta para a regra de ter ao menos um envolvido vinculado.</div>
+        </div>
+
         <div class="right">
           <button class="btn btn--outline" id="btn-limpar-filtros" type="button">Limpar</button>
           <button class="btn" id="btn-executar-busca" type="button">Buscar</button>
@@ -479,6 +486,10 @@
       editFatoIndex: null, // null = criando; number = editando
     };
 
+  // ---------- Constantes ----------
+  // CPF reservado para representar um envolvido não identificado
+  const CPF_NAO_IDENTIFICADO = 'NAO_IDENTIFICADO';
+
     // ---------- Util ----------
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -507,9 +518,10 @@
       }
       state.envolvidos.forEach((e, idx) => {
         const tr = document.createElement('tr');
+        const cpfMasked = maskCPF(e.cpf);
         tr.innerHTML = `
           <td>${e.nome}</td>
-          <td>${maskCPF(e.cpf)}</td>
+          <td>${cpfMasked || '-'}</td>
           <td>${e.matricula||'-'}</td>
           <td>
             <button class="btn btn--outline" data-rm-env="${idx}" type="button">Remover</button>
@@ -664,16 +676,27 @@
       const selecionados = checks
         .map((c,i)=> c.checked ? lista[i] : null)
         .filter(Boolean);
-      if(selecionados.length===0){
-        alert('Selecione pelo menos uma pessoa para vincular.');
+      const flagNI = $('#chk-nao-identificado').checked;
+      if(selecionados.length===0 && !flagNI){
+        alert('Selecione pelo menos uma pessoa para vincular ou marque "Não identificado".');
         return;
       }
       // evitar duplicados por CPF
       const existentes = new Set(state.envolvidos.map(e=>e.cpf));
+      // adiciona selecionados
       selecionados.forEach(s=>{
-        if(!existentes.has(s.cpf)) state.envolvidos.push(s);
+        if(!existentes.has(s.cpf)) {
+          state.envolvidos.push(s);
+          existentes.add(s.cpf);
+        }
       });
+      // adiciona envolvido "Não identificado" se marcado
+      if(flagNI && !existentes.has(CPF_NAO_IDENTIFICADO)){
+        state.envolvidos.push({ nome:'Não identificado', cpf: CPF_NAO_IDENTIFICADO, matricula: null });
+      }
       renderEnvolvidos();
+      // limpar seleção e fechar
+      $('#chk-nao-identificado').checked = false;
       closeModal('modal-busca');
     }
 
@@ -692,6 +715,7 @@
         $('#buscaNome').value = '';
         $('#buscaCPF').value = '';
         $('#buscaMatricula').value = '';
+  $('#chk-nao-identificado').checked = false;
         renderResultadosBusca(MOCK_MEMBROS); // default: lista inteira
         openModal('modal-busca');
       });
@@ -708,6 +732,7 @@
         $('#buscaNome').value = '';
         $('#buscaCPF').value = '';
         $('#buscaMatricula').value = '';
+  $('#chk-nao-identificado').checked = false;
         renderResultadosBusca(MOCK_MEMBROS);
       });
 
