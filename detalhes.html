@@ -373,6 +373,12 @@
               </table>
             </div>
             <div class="hint">Defina o resultado de mérito para cada relação envolvido × fato.</div>
+            <!-- Penalidades por envolvido condenado -->
+            <div id="wrap-penalidades" style="margin-top:12px; display:none">
+              <span class="label">Penalidades por envolvido condenado</span>
+              <div id="penalidades-container" style="display:flex; flex-direction:column; gap:8px"></div>
+              <div class="hint">As penalidades são aplicadas por envolvido (independente da quantidade de fatos) e podem ser múltiplas.</div>
+            </div>
           </div>
           <!-- Campo condicional: Número ELO do CNMP (apenas quando "Avocação pelo CNMP" for selecionado) -->
           <div class="field" id="field-elo" style="grid-column:1 / -1; display:none">
@@ -507,9 +513,20 @@
         .forEach((a,idx)=>{
           const tr = document.createElement('tr');
           const link = a.arquivo?.url ? `<a href="${a.arquivo.url}" download>${escapeHtml(a.arquivo.nome)}</a>` : '—';
+          // Monta bloco de penalidades (se houver)
+          let penalBlock = '';
+          if(Array.isArray(a.penalidadesPorEnvolvido) && a.penalidadesPorEnvolvido.length){
+            const mapCpfNome = new Map((state.procedimento?.envolvidos||[]).map(e=>[e.cpf, e.nome]));
+            const lines = a.penalidadesPorEnvolvido.map(p=>{
+              const nome = mapCpfNome.get(p.cpf) || p.cpf;
+              const chips = (p.penalidades||[]).map(x=>`<span class="chip">${escapeHtml(x)}</span>`).join(' ');
+              return `<div style="margin-top:6px"><strong>${escapeHtml(nome)}:</strong> ${chips || '—'}</div>`;
+            }).join('');
+            penalBlock = `<div class="hint" style="margin-top:6px">Penalidades aplicadas</div>${lines}`;
+          }
           tr.innerHTML = `
             <td>${formatDate(a.data)||'—'}</td>
-            <td>${escapeHtml(a.descricao||'')}</td>
+            <td>${escapeHtml(a.descricao||'')}${penalBlock}</td>
             <td>${link}</td>
             <td><div class="table__actions">
               <button class="btn btn--muted btn--sm" data-idx="${idx}" data-acao="remover">Remover</button>
@@ -562,6 +579,8 @@
   $$('input[name="and-julg"]').forEach(el=> el.checked = false);
   const f6 = $('#field-merito'); if(f6) f6.style.display = 'none';
   const tbm = $('#tbody-merito'); if(tbm) tbm.innerHTML = '<tr><td colspan="3">—</td></tr>';
+  const wpen = $('#wrap-penalidades'); if(wpen) wpen.style.display = 'none';
+  const pcont = $('#penalidades-container'); if(pcont) pcont.innerHTML = '';
   const f5 = $('#field-elo'); if(f5) f5.style.display = 'none';
   const elo = $('#and-elo'); if(elo) elo.value = '';
     }
@@ -623,6 +642,22 @@
           return resultado ? { cpf, fatoIdx, resultado } : null;
         }).filter(Boolean);
         if(decisoes.length){ novo.decisoesMerito = decisoes; }
+        // penalidades: agrupa por CPF
+        const wpen = $('#wrap-penalidades');
+        if(wpen && getComputedStyle(wpen).display !== 'none'){
+          const checks = $$('input[data-penalidade]');
+          const map = new Map(); // cpf -> Set penalidades
+          checks.forEach(ch=>{
+            if(!ch.checked) return;
+            const cpf = ch.getAttribute('data-cpf');
+            const val = ch.value;
+            if(!map.has(cpf)) map.set(cpf, new Set());
+            map.get(cpf).add(val);
+          });
+          if(map.size){
+            novo.penalidadesPorEnvolvido = Array.from(map.entries()).map(([cpf, set])=>({ cpf, penalidades: Array.from(set) }));
+          }
+        }
       }
       // inclui número ELO se campo estiver visível e houver valor
       const fieldEloVisible = $('#field-elo') && getComputedStyle($('#field-elo')).display !== 'none';
@@ -708,6 +743,8 @@
             if(tbm) buildMeritoTable();
           } else {
             if(tbm) tbm.innerHTML = '<tr><td colspan="3">—</td></tr>';
+            const wpen = $('#wrap-penalidades'); if(wpen) wpen.style.display = 'none';
+            const pcont = $('#penalidades-container'); if(pcont) pcont.innerHTML = '';
           }
         }
         // Avocação pelo CNMP -> Número ELO
@@ -772,6 +809,79 @@
         if(count===0){
           tbody.innerHTML = '<tr><td colspan="3">Nenhuma relação envolvido × fato encontrada.</td></tr>';
         }
+        // listeners para atualizar penalidades quando houver alterações
+        $$('#tbody-merito select[data-merito="resultado"]').forEach(sel=>{
+          sel.addEventListener('change', updatePenalidadesUI);
+        });
+        // inicializa estado de penalidades
+        updatePenalidadesUI();
+      }
+
+      // Lista de penalidades possíveis
+      const PENALIDADES = [
+        'Advertência',
+        'Censura',
+        'Suspensão',
+        'Remoção Compulsória',
+        'Disponibilidade Compulsória',
+        'Aposentadoria Compulsória',
+        'Demissão/Exoneração',
+        'Cassação de Disponibilidade',
+        'Cassação de Aposentadoria',
+        'Cassação de Promoção ou Remoção'
+      ];
+
+      // Atualiza UI de penalidades com base nos envolvidos que tenham pelo menos uma "Condenação"
+      function updatePenalidadesUI(){
+        const wrap = $('#wrap-penalidades');
+        const cont = $('#penalidades-container');
+        if(!wrap || !cont) return;
+        const selects = $$('#tbody-merito select[data-merito="resultado"]');
+        // Mapeia CPF -> se possui ao menos uma condenação
+        const condenados = new Map(); // cpf -> { nome }
+        const p = state.procedimento || { envolvidos: [] };
+        const mapCpfNome = new Map((p.envolvidos||[]).map(e=>[e.cpf, e.nome]));
+        selects.forEach(sel=>{
+          const val = sel.value;
+          const cpf = sel.getAttribute('data-cpf');
+          if(val === 'Condenação'){
+            condenados.set(cpf, { nome: mapCpfNome.get(cpf) || cpf });
+          }
+        });
+        if(condenados.size === 0){
+          wrap.style.display = 'none';
+          cont.innerHTML = '';
+          return;
+        }
+        // Renderiza blocos de penalidades por envolvido condenado
+        wrap.style.display = '';
+        cont.innerHTML = '';
+        condenados.forEach((info, cpf)=>{
+          const section = document.createElement('div');
+          section.style.border = '1px solid var(--border)';
+          section.style.borderRadius = '10px';
+          section.style.padding = '10px';
+          section.innerHTML = `
+            <div style="font-weight:700; margin-bottom:8px">${escapeHtml(info.nome)}</div>
+            <div class="row-actions" style="flex-wrap:wrap" data-penal-cpf="${escapeHtml(cpf)}"></div>
+          `;
+          cont.appendChild(section);
+          const holder = section.querySelector('[data-penal-cpf]');
+          PENALIDADES.forEach(pn=>{
+            const lbl = document.createElement('label');
+            lbl.className = 'chip';
+            lbl.style.cursor = 'pointer';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.value = pn;
+            input.setAttribute('data-penalidade', '');
+            input.setAttribute('data-cpf', cpf);
+            input.style.marginRight = '6px';
+            lbl.appendChild(input);
+            lbl.appendChild(document.createTextNode(pn));
+            holder.appendChild(lbl);
+          });
+        });
       }
 
       // Limpeza na saída: revoga blob URLs
